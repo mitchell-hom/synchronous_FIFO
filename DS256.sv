@@ -5,36 +5,36 @@
 /* NOTE: this design assumes that 1 timestep is significantly less than the period of the clock
 this is because of the flagging for the FIFO being full, which updates the timestep AFTER
 the data is latched */
-module DS256 (	input [BUS_WIDTH-1:0] DIN,
+module DS256 (	input [global_constants::BUS_WIDTH-1:0] DIN,
 		input WR_EN,
 		input RD_EN,
 		input CLK,
 		input SINIT,
 		output reg FULL,
-		output reg [COUNT_BITS-1:0] DATA_COUNT, 
+		output reg [global_constants::COUNT_BITS-1:0] DATA_COUNT, 
 		output reg WR_ACK,
 		output reg WR_ERR,
-		output reg [BUS_WIDTH-1:0] DOUT,
+		output reg [global_constants::BUS_WIDTH-1:0] DOUT,
 		output reg EMPTY,
 		output reg RD_ACK,
 		output reg RD_ERR);
 
-	bit [COUNT_BITS-1:0] count;
-	bit [DEPTH-1:0] rPtr, wPtr;
-	reg [DEPTH-1:0] array [BUS_WIDTH-1:0];
+	bit [global_constants::COUNT_BITS-1:0] count;
+	bit [global_constants::DEPTH-1:0] rPtr, wPtr;
+	reg [global_constants::DEPTH-1:0] array [global_constants::BUS_WIDTH-1:0];
 	reg fullFlag, emptyFlag;
 
 	always_ff @(posedge CLK) begin
 		// SINIT; synchronous reset
 		if (SINIT) begin
-			array <= '0; // clear memory
+			array <= '{global_constants::DEPTH{'0}}; // clear memory
 			// reset pointers
-			wPtr <= '0; 
-			rPtr <= '0;
-			count <= '0;	
+			wPtr <= 0; 
+			rPtr <= 0;
+			count <= 0;	
 
 			// reset output pins
-			DATA_COUNT <= '0;		
+			DATA_COUNT <= 0;		
 			EMPTY <= 1;
 			FULL <= 0;
 
@@ -84,12 +84,15 @@ module DS256 (	input [BUS_WIDTH-1:0] DIN,
 		end // normal operation (non-reset)	
 	end // always_ff...
 
+	// TODO can't write to same variable in combinational block and sequential
+	// block, so need to implement this elsewhere
+	/*
 	always_comb begin
-		fullFlag = count == DEPTH - 1;
+		fullFlag = count == global_constants::DEPTH - 1;
 		FULL = fullFlag;
 
 		emptyFlag = count == 0;
 		EMPTY = emptyFlag;
 	end // always_comb
-
+	*/
 endmodule : DS256;

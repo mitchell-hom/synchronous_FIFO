@@ -3,7 +3,7 @@ class agent extends uvm_agent;
 
 	function new(string name="agent", uvm_component parent = null);
 		super.new(name, parent);
-	endfunction : new
+	endfunction
 
 	// handles
 	driver Idrv;

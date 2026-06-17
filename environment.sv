@@ -1,9 +1,9 @@
 class environment extends uvm_env;
 	`uvm_component_utils(environment);
 
-	function new (string name="environment", parent=null);
+	function new (string name="environment", uvm_component parent=null);
 		super.new(name, parent);
-	endfunction : new
+	endfunction
 
 	agent Iagent;
 	scoreboard Isb;

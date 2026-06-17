@@ -5,10 +5,12 @@ module tb_top;
 	reg clk;
 
 	// clock generation at specified frequency
-	always #PERIOD clk = ~= clk;
+	//always #global_constants::PERIOD clk =~ clk;
+	always #10 clk =~ clk; // TODO fix this
 
 	DS256_if Iif(clk);
-	DS256 Idut(	.DIN(Iif.DIN),
+	DS256 Idut(	.CLK(Iif.CLK), 
+			.DIN(Iif.DIN),
 			.WR_EN(Iif.WR_EN),
 			.RD_EN(Iif.RD_EN),
 			.SINIT(Iif.SINIT),
@@ -24,10 +26,14 @@ module tb_top;
 
 	// meat and potatoes
 	initial begin
-		#10;
-		Itest = new();
-		Itest.Ienv.vIf = Iif;
-		Itest.run();
+		// VIRTUAL; because we have to pass in as virtual
+		//virtual DS256_if vIf;
+		//vIf = Iif;
+		uvm_config_db#(virtual DS256_if)::set(null, "uvm_test_top", "vIf", Iif); // TODO these two args
+		run_test("test");
+		//Itest = new("Itest");
+		//Itest.Ienv.vIf = Iif;
+		//Itest.run();
 
 		#10;
 		$finish;

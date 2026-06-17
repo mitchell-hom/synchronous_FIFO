@@ -3,7 +3,7 @@ class scoreboard extends uvm_scoreboard;
 
 	function new(string name="scoreboard", uvm_component parent=null);
 		super.new(name, parent);
-	endfunction : new
+	endfunction
 
 	int compare; // compare data
 	int data[$]; // model queue
@@ -17,13 +17,13 @@ class scoreboard extends uvm_scoreboard;
 
 	// write to analysis implementation
 	// TODO: add more checking here
-	virtual function write(packet pkt);
+	virtual function void write(packet pkt);
 		// track WRITE operations
 		// sync to clock edge done in monitor
-		if (pkt.WR_EN  & !pkt.SINIT & !FULL) begin
+		if (pkt.WR_EN  & !pkt.SINIT & !pkt.FULL) begin
 			data.push_back(pkt.DIN); // TODO: will data widths work out here???
 		// track READ operations
-		end else if (pkt.RD_EN & !pkt.SINIT & !EMPTY) begin
+		end else if (pkt.RD_EN & !pkt.SINIT & !pkt.EMPTY) begin
 			compare = data.pop_front();
 			// TODO: actually compare
 			// for now, just write out values

@@ -1,9 +1,9 @@
-class driver extends uvm_driver(packet);
+class driver extends uvm_driver #(packet);
 	`uvm_component_utils(driver);
 
-	function new(string name="driver"); // TODO: need to add something for uvm parent attribute?
-		super.new(name);
-	endfunction : new
+	function new(string name="driver", uvm_component parent=null); 
+		super.new(name, parent);
+	endfunction 
 
 	virtual DS256_if vIf;
 

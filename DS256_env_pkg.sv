@@ -1,9 +1,7 @@
 package DS256_env_pkg;
-	// TODO: uncomment
-	// import uvm_pkg::*;
-	// include "uvm_macros.svh"
-
 	import global_constants::*;
+	import uvm_pkg::*;
+	`include "uvm_macros.svh"
 
 	// testbench files
 	`include "packet.sv"

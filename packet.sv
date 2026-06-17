@@ -15,16 +15,16 @@ class packet extends uvm_sequence_item;
 
 	// get all the bells n whistles (methods) for these guys
 	`uvm_object_utils_begin(packet)
-		`uvm_field_int([BUS_WIDTH-1:0] DIN);
+		`uvm_field_int(DIN);
 		`uvm_field_int(WR_EN);
 		`uvm_field_int(RD_EN);
 		`uvm_field_int(CLK);
 		`uvm_field_int(SINIT);
 		`uvm_field_int(FULL);
-		`uvm_field_int([COUNT_BITS-1:0] DATA_COUNT);
+		`uvm_field_int(DATA_COUNT);
 		`uvm_field_int(WR_ACK);
 		`uvm_field_int(WR_ERR);
-		`uvm_field_int([BUS_WIDTH-1:0] DOUT);
+		`uvm_field_int(DOUT);
 		`uvm_field_int(EMPTY);
 		`uvm_field_int(RD_ACK);
 		`uvm_field_int(RD_ERR);
@@ -32,5 +32,5 @@ class packet extends uvm_sequence_item;
 
 	function new(string name="packet");
 		super.new(name);
-	endfunction : new
+	endfunction
 endclass : packet
