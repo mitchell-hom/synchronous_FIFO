@@ -9,5 +9,5 @@ Much of the testbench code was based on code found on [chipverify](https://chipv
 - warnings
 - clean up to do's
 - clean up directory
-* put components into svh files?
+  * put components into svh files?
 - write rest of verification plan
