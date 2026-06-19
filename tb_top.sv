@@ -1,7 +1,7 @@
 module tb_top;
 	import uvm_pkg::*;
 	import DS256_env_pkg::*;
-	
+
 	reg clk;
 
 	// clock generation at specified frequency
@@ -27,20 +27,16 @@ module tb_top;
 	// meat and potatoes
 	initial begin
 		// VIRTUAL; because we have to pass in as virtual
-		//virtual DS256_if vIf;
-		//vIf = Iif;
-		uvm_config_db#(virtual DS256_if)::set(null, "uvm_test_top", "vIf", Iif); // TODO these two args
+		uvm_config_db#(virtual DS256_if)::set(null, "uvm_test_top", "vIf", Iif);
 		run_test("test");
-		//Itest = new("Itest");
-		//Itest.Ienv.vIf = Iif;
-		//Itest.run();
 
 		#10;
-		$finish;
+		$finish; // TODO: do I need this???
 	end
 
+	// write data
 	initial begin
-		$dumpvars;
-		$dumpfile ("dump.vcd"); // TODO: correct file type?
+		$dumpfile("dump.vcd");
+		$dumpvars; 
 	end // initial begin...
 endmodule : tb_top

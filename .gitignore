@@ -1,5 +1,6 @@
 # files
 run
+output.log
 
 # directories
 obj_dir

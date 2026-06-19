@@ -3,9 +3,11 @@ package DS256_env_pkg;
 	import uvm_pkg::*;
 	`include "uvm_macros.svh"
 
-	// testbench files
+	// testbench files; these need to be in hierarchical order
 	`include "packet.sv"
-	`include "seq_startup.sv"
+	// sequences
+	`include "./sequences/seq_startup.sv"
+	// end sequences
 	`include "driver.sv"
 	`include "monitor.sv"
 	`include "agent.sv"
