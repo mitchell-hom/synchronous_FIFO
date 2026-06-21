@@ -27,7 +27,7 @@ class scoreboard extends uvm_scoreboard;
 			compare = data.pop_front();
 			// TODO: actually compare
 			// for now, just write out values
-			`uvm_info(get_type_name(), compare, UVM_LOW);
+			`uvm_info(get_type_name(), $sformatf("read data: %0d", compare), UVM_LOW);
 		end
 		// TODO everything else
 	endfunction : write

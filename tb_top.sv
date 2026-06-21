@@ -1,14 +1,23 @@
-module tb_top;
-	import uvm_pkg::*;
-	import DS256_env_pkg::*;
+`timescale 1ns/1ps
 
-	reg clk;
+import uvm_pkg::*;
+import DS256_env_pkg::*;
+`include "uvm_macros.svh"
+
+module tb_top;
+	logic clk, sinit;
 
 	// clock generation at specified frequency
 	//always #global_constants::PERIOD clk =~ clk;
-	always #10 clk =~ clk; // TODO fix this
+	//always #10 clk =~ clk; // TODO fix this
+	initial begin 
+		clk = 0;
+		forever begin
+			#10 clk =~ clk;
+		end
+	end
 
-	DS256_if Iif(clk);
+	DS256_if Iif(clk, sinit);
 	DS256 Idut(	.CLK(Iif.CLK), 
 			.DIN(Iif.DIN),
 			.WR_EN(Iif.WR_EN),
@@ -22,21 +31,30 @@ module tb_top;
 			.EMPTY(Iif.EMPTY),
 			.RD_ACK(Iif.RD_ACK),
 			.RD_ERR(Iif.RD_ERR));
-	test Itest;
+	base_test Itest;
+
+	// initialize
+	initial begin
+		sinit = 1;
+		#10;
+		sinit = 0;
+	end
 
 	// meat and potatoes
 	initial begin
 		// VIRTUAL; because we have to pass in as virtual
-		uvm_config_db#(virtual DS256_if)::set(null, "uvm_test_top", "vIf", Iif);
-		run_test("test");
+		uvm_config_db#(virtual DS256_if)::set(uvm_root::get(), "*", "vIf", Iif);
+		//run_test("test");
+	end
 
-		#10;
-		$finish; // TODO: do I need this???
+	// run test
+	initial begin
+		run_test("base_test");
 	end
 
 	// write data
 	initial begin
 		$dumpfile("dump.vcd");
-		$dumpvars; 
+		$dumpvars(1, tb_top); 
 	end // initial begin...
 endmodule : tb_top

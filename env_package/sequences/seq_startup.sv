@@ -33,6 +33,8 @@ class seq_startup extends uvm_sequence #(packet);
 
 		repeat(STARTUP_CYCLES-1) begin
 			start_item(pkt);
+			// forces sequencer to wait for clock edge???
+			pkt.SINIT = 1'b1; // experiment to see if it runs
 			finish_item(pkt);
 		end // repeat
 		

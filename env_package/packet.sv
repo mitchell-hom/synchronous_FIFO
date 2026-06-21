@@ -2,16 +2,16 @@ class packet extends uvm_sequence_item;
 	rand bit [BUS_WIDTH-1:0] DIN;
         rand bit WR_EN;
         rand bit RD_EN;
-        rand bit CLK;
+        bit CLK;
         rand bit SINIT;
-        rand bit FULL;
-        rand bit [COUNT_BITS-1:0] DATA_COUNT;
-        rand bit WR_ACK;
-        rand bit WR_ERR;
-        rand bit [BUS_WIDTH-1:0] DOUT;
-        rand bit EMPTY;
-        rand bit RD_ACK;
-        rand bit RD_ERR;
+       	bit FULL;
+        bit [COUNT_BITS-1:0] DATA_COUNT;
+        bit WR_ACK;
+        bit WR_ERR;
+        bit [BUS_WIDTH-1:0] DOUT;
+        bit EMPTY;
+        bit RD_ACK;
+        bit RD_ERR;
 
 	// get all the bells n whistles (methods) for these guys
 	`uvm_object_utils_begin(packet)

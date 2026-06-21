@@ -6,21 +6,23 @@ class agent extends uvm_agent;
 	endfunction
 
 	// handles
-	driver Idrv;
-	monitor Imon;
-	uvm_sequencer #(packet) Iseq;
+	driver Idriver;
+	uvm_analysis_port #(packet) monAP;
+	monitor Imonitor;
+	uvm_sequencer #(packet) Isequencer;
 
 	// phases
 	virtual function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
 
-		Idrv = driver::type_id::create("Idrv", this);
-		Imon = monitor::type_id::create("Imon", this);
-		Iseq  = uvm_sequencer#(packet)::type_id::create("Iseq", this);
+		monAP = new("monAP", this);
+		Idriver = driver::type_id::create("Idriver", this);
+		Imonitor = monitor::type_id::create("Imonitor", this);
+		Isequencer  = uvm_sequencer#(packet)::type_id::create("Isequencer", this);
 	endfunction : build_phase	
 
 	virtual function void connect_phase(uvm_phase phase);
 		super.connect_phase(phase);
-		Idrv.seq_item_port.connect(Iseq.seq_item_export);
+		Idriver.seq_item_port.connect(Isequencer.seq_item_export);
 	endfunction : connect_phase
 endclass : agent
