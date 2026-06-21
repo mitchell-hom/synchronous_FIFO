@@ -1,6 +1,7 @@
 # files
 run
 output.log
+dump.vcd
 
 # directories
 obj_dir
