@@ -19,4 +19,4 @@ Notes:
 Resources:
 [chipverify](https://chipverify.com/uvm/uvm-tutorial)
 [antmicro verilator UVM example](https://github.com/antmicro/verilator-uvm-example/tree/main)
-[cluelogic UVM Tutorial for Candy Lovers](https://cluelogic.com/)
+[cluelogic UVM Tutorial for Candy Lovers](https://cluelogic.com/) 
