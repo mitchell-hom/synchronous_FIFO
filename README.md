@@ -15,3 +15,7 @@ Notes:
 - clean up directory
   * put components into svh files?
 - write rest of verification plan
+
+Resources:
+[chipverify](https://chipverify.com/uvm/uvm-tutorial)
+[antmicro verilator UVM example](https://github.com/antmicro/verilator-uvm-example/tree/main)
