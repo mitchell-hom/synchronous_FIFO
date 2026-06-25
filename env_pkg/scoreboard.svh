@@ -1,18 +1,20 @@
 class scoreboard extends uvm_scoreboard;
 	`uvm_component_utils(scoreboard);
-
-	function new(string name="scoreboard", uvm_component parent=null);
-		super.new(name, parent);
-	endfunction
-
-	int compare; // compare data
+  
+  	int compare; // compare data
 	int data[$]; // model queue
 	uvm_analysis_imp #(packet, scoreboard) mAI;
+  
+	function new(string name, uvm_component parent);
+		super.new(name, parent);
+	endfunction
 
 	// phases
 	virtual function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		mAI = new("mAI", this);
+		
+      	// instantiate analysis implementation
+      	mAI = new("mAI", this);
 	endfunction : build_phase
 
 	// write to analysis implementation

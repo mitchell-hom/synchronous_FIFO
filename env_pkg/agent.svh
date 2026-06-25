@@ -1,15 +1,15 @@
 class agent extends uvm_agent;
 	`uvm_component_utils(agent);
-
-	function new(string name="agent", uvm_component parent = null);
-		super.new(name, parent);
-	endfunction
-
-	// handles
+  
+  	// handles
 	driver Idriver;
 	uvm_analysis_port #(packet) monAP;
 	monitor Imonitor;
 	uvm_sequencer #(packet) Isequencer;
+
+	function new(string name, uvm_component parent);
+		super.new(name, parent);
+	endfunction
 
 	// phases
 	virtual function void build_phase(uvm_phase phase);
@@ -23,6 +23,9 @@ class agent extends uvm_agent;
 
 	virtual function void connect_phase(uvm_phase phase);
 		super.connect_phase(phase);
+      
+      	// connect ports
 		Idriver.seq_item_port.connect(Isequencer.seq_item_export);
+      	Imonitor.monAP.connect(monAP);
 	endfunction : connect_phase
 endclass : agent

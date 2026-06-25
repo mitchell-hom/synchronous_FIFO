@@ -4,7 +4,7 @@ class monitor extends uvm_monitor;
 	uvm_analysis_port #(packet) monAP;
 	virtual DS256_if vIf;
 
-	function new(string name="monitor", uvm_component parent=null);
+	function new(string name, uvm_component parent);
 		super.new(name, parent);
 	endfunction
 	
@@ -14,28 +14,30 @@ class monitor extends uvm_monitor;
 
 		monAP = new("monAP", this);
 
-		if (!uvm_config_db#(virtual DS256_if)::get(null, "*", "vIf", vIf)) begin
-			`uvm_fatal("VIF_ERROR", "Could not retrieve virtual interface.")
-		end
+      	// try to retrieve interface
+      	assert(uvm_config_db#(virtual DS256_if)::get(this, "", "DS256_if", vIf)); 
 	endfunction : build_phase
 
 	virtual task run_phase(uvm_phase phase);
 		packet pkt;
 
-		super.run_phase(phase);
-
+      	// uvm monitor doesn't have functionality, so we don't call parent
+      	// class's run phase
 		forever begin
 			// wait for edge of clock, then sample
-			@(vIf.CLK);
-			pkt = new();
+          	@(vIf.CLK);
 			
+          	// instantiate packet
+          	pkt = packet::type_id::create("pkt");
+          
 			// get data from interface
-			// need to be blocking bc pkt is temporary; might
-			// disappear before assignment
+			// needs to be blocking bc pkt isn't persistent;
+          	// gets dynamically created and destroyed throughout
+          	// simulation
 			pkt.DIN = vIf.DIN;
 			pkt.WR_EN = vIf.WR_EN;
 			pkt.RD_EN = vIf.RD_EN;
-			// no clock
+			pkt.CLK = vIf.CLK;
 			pkt.SINIT = vIf.SINIT;
 			pkt.FULL = vIf.FULL;
 			pkt.DATA_COUNT = vIf.DATA_COUNT;

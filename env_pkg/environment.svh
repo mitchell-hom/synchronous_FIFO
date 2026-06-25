@@ -4,7 +4,7 @@ class environment extends uvm_env;
 	agent Iagent;
 	scoreboard Iscoreboard;
 
-	function new (string name="environment", uvm_component parent=null);
+	function new (string name, uvm_component parent);
 		super.new(name, parent);
 	endfunction
 
@@ -18,8 +18,6 @@ class environment extends uvm_env;
 
 	virtual function void connect_phase(uvm_phase phase);
 		super.connect_phase(phase);
-
-		//Iagent.Imonitor.mAP.connect(Iscoreboard.mAI);
 		Iagent.monAP.connect(Iscoreboard.mAI);
 	endfunction : connect_phase
 endclass : environment

@@ -3,7 +3,7 @@ class seq_startup extends uvm_sequence #(packet);
 
 	packet pkt;
 
-	function new (string name="seq_startup");
+  function new (string name="seq_startup");
 		super.new(name);
 	endfunction
 
@@ -15,15 +15,15 @@ class seq_startup extends uvm_sequence #(packet);
 		
 		// drive for the prescribed number of clock cycles
 		start_item(pkt);
+      
+      	// turn off randomization
+      	pkt.rand_mode(0);
 
+      	// set contents of packet
 		pkt.SINIT = 1'b1;
 		pkt.DIN = '0;
 		pkt.WR_EN = '0;
 		pkt.RD_EN = '0;
-		void'(pkt.SINIT.rand_mode(0));
-		void'(pkt.DIN.rand_mode(0));
-		void'(pkt.WR_EN.rand_mode(0));
-		void'(pkt.RD_EN.rand_mode(0));
 
 		if (!pkt.randomize()) begin
 			`uvm_fatal("seq_startup", "randomization failed")
