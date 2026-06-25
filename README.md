@@ -3,20 +3,16 @@ UVM testbench for a synchronous FIFO.
 
 Design under test was made by me based on the DS256 synchronous FIFO found [here](https://docs.amd.com/v/u/en-US/sync_fifo).
 
-Much of the testbench code was based on code found on [chipverify](https://chipverify.com/uvm/uvm-tutorial), which has been a great resource for gaining more knowledge on SystemVerilog and UVM.
+This is a repository containing my work verifying my implementation of a synchronous FIFO that I wrote myself. The purpose of this is to gain intuition on UVM and secondarily, in writing RTL. This is an ongoing project, so I am learning as I go, and I'm sure I'll find real bugs in my design, which I'm quite excited to address.
 
-Notes:
-- there are a lot of workarounds because I am using Verilator
- * ex. can't have base_test in the package, because Verilator requires me to compile with +define+UVM_NO_DPI, meaning it can't resolve the class name on its own, so it just quits at t=0
 
 # TODO:
 - warnings
 - clean up to do's
-- clean up directory
-  * put components into svh files?
 - write rest of verification plan
+- functional verification
 
 Resources:
-[chipverify](https://chipverify.com/uvm/uvm-tutorial)
-[antmicro verilator UVM example](https://github.com/antmicro/verilator-uvm-example/tree/main)
-[cluelogic UVM Tutorial for Candy Lovers](https://cluelogic.com/) 
+1. [chipverify](https://chipverify.com/uvm/uvm-tutorial)
+2. [antmicro verilator UVM example](https://github.com/antmicro/verilator-uvm-example/tree/main)
+3. [cluelogic UVM Tutorial for Candy Lovers](https://cluelogic.com/) 
