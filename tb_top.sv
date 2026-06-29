@@ -8,9 +8,7 @@ module tb_top;
 	logic clk, sinit;
   
   	// clock generation at specified frequency
-	//always #global_constants::PERIOD clk =~ clk;
-	//always #10 clk =~ clk; // TODO fix this
-  	always #10 clk =~ clk;
+  always #(global_constants::PERIOD / 2) clk =~ clk;
 
 	DS256_if Iif(clk, sinit);
 	DS256 Idut(	.CLK(Iif.CLK), 
@@ -31,7 +29,7 @@ module tb_top;
   	// run verification
   	initial begin
       uvm_config_db#(virtual DS256_if)::set(null, "*", "DS256_if", Iif);
-      run_test();
+      run_test("base_test");
     end
 
   	// initialize values
@@ -39,13 +37,18 @@ module tb_top;
       	clk = 0;
       	sinit = 1;
       
-      	#10;
+      	// testing this
+      	Iif.DIN = '0;
+      	Iif.WR_EN = 0;
+      	Iif.RD_EN = 0;
+      
+      	#(global_constants::PERIOD);
       	sinit = 0;
     end      	
 
-	// write data to output file
+	// write wave data to output file
 	initial begin
-		$dumpfile("dump.vcd");
-		$dumpvars(1, tb_top); 
+      	$dumpfile("dump.vcd");
+		$dumpvars(); 
 	end 
 endmodule : tb_top
