@@ -6,13 +6,15 @@ class monitor extends uvm_monitor;
 
 	function new(string name, uvm_component parent);
 		super.new(name, parent);
+      
+      	monAP = new("monAP", this);
 	endfunction
 	
 	// phases
 	virtual function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
 
-		monAP = new("monAP", this);
+		//monAP = new("monAP", this);
 
       	// try to retrieve interface
       	assert(uvm_config_db#(virtual DS256_if)::get(this, "", "DS256_if", vIf)); 
