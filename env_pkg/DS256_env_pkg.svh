@@ -6,7 +6,7 @@ package DS256_env_pkg;
 	// testbench files; these need to be in hierarchical order
 	`include "packet.svh"
 	// sequences
-	`include "./sequences/seq_startup.svh"
+	`include "seq_write.svh"
 	// end sequences
 	`include "driver.svh"
 	`include "monitor.svh"
