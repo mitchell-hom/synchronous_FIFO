@@ -16,4 +16,4 @@ Resources:
 1. [chipverify](https://chipverify.com/uvm/uvm-tutorial)
 2. [antmicro verilator UVM example](https://github.com/antmicro/verilator-uvm-example/tree/main)
 3. [cluelogic UVM Tutorial for Candy Lovers](https://cluelogic.com/)
-4. [Siemens Verification Academy] (https://verificationacademy.com/)
+4. [Siemens Verification Academy](https://verificationacademy.com/)
