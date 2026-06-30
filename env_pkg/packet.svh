@@ -33,4 +33,21 @@ class packet extends uvm_sequence_item;
 	function new(string name="packet");
 		super.new(name);
 	endfunction
+  
+  	// supporting functions
+  	function bit is_write();
+      	if (!SINIT && WR_EN && !RD_EN) begin
+      		return 1;
+        end else begin
+          	return 0;
+        end
+    endfunction : is_write
+          
+    function bit is_read();
+      	if (!SINIT && RD_EN && !WR_EN) begin
+      		return 1;
+        end else begin
+          	return 0;
+        end
+    endfunction : is_read
 endclass : packet
