@@ -20,6 +20,7 @@ class scoreboard extends uvm_scoreboard;
       	//mAI = new("mAI", this);
 	endfunction : build_phase
   
+	// TODO: checking for handshaking signals
   	virtual function void check_phase(uvm_phase phase);
     	super.check_phase(phase);
    
@@ -28,16 +29,17 @@ class scoreboard extends uvm_scoreboard;
       	// iterate through captured packets
       	foreach (pkts[i]) begin
           	// track WRITE operations
-			// sync to clock edge done in monitor
-          	if (pkts[i].WR_EN  && !pkts[i].SINIT && !pkts[i].FULL) begin
-            	data.push_back(pkts[i].DIN); 
-          
-			// track READ operations
-            end else if (pkts[i].RD_EN && !pkts[i].SINIT && !pkts[i].EMPTY) begin
-				compare = data.pop_front();
+			// sync to clock edge done in monitori
+          	if (pkts[i].is_write()) begin
+              data.push_back(pkts[i].DIN);
+                               
+        	// track READ operations
+            end else if (pkts[i].is_read()) begin
+              	compare = data.pop_front();
               
-            	if (pkts[i].DOUT != compare) begin
-            	`	uvm_error("SB_READ", $sformatf("Incorrect data received. Expected: %b Actual: %b", compare, pkts[i].DOUT))
+              	// do comparison
+              	if (pkts[i].DOUT != compare) begin
+            		`uvm_error("SB_READ", $sformatf("Incorrect data received. Expected: %b Actual: %b", compare, pkts[i].DOUT))
 				end else begin
             		`uvm_info("SB_READ", $sformatf("Data received. Expected: %b Actual: %b", compare, pkts[i].DOUT), UVM_LOW)
                 end // else
