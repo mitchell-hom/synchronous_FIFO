@@ -1,7 +1,7 @@
 class scoreboard extends uvm_scoreboard;
 	`uvm_component_utils(scoreboard);
   
-  	int compare; // compare data
+  	bit [global_constants::DEPTH-1:0] compare; // compare data
 	int data[$]; // model queue
   	packet pkts[$];
 	uvm_analysis_imp #(packet, scoreboard) mAI;
@@ -41,9 +41,11 @@ class scoreboard extends uvm_scoreboard;
               	if (pkts[i].DOUT != compare) begin
             		`uvm_error("SB_READ", $sformatf("Incorrect data received. Expected: %b Actual: %b", compare, pkts[i].DOUT))
 				end else begin
-            		`uvm_info("SB_READ", $sformatf("Data received. Expected: %b Actual: %b", compare, pkts[i].DOUT), UVM_LOW)
+                  `uvm_info("SB_READ", $sformatf("Data received. Expected: %04b Actual: %b", 4'(compare), pkts[i].DOUT), UVM_LOW)
                 end // else
             end // else if
+          
+          	// TODO handshaking
     	end // foreach
 	endfunction : check_phase
     
