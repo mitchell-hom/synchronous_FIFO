@@ -14,6 +14,8 @@ class seq_write extends uvm_sequence #(packet);
       	multi_rd();
       	device_rst();
       	intlv();
+      	il_rq();
+     	rand_cmds();
 	endtask : body
   
   	// multiple writes in a row
@@ -71,12 +73,64 @@ class seq_write extends uvm_sequence #(packet);
       	`uvm_info("SEQ_INTLV", "Starting interleave", UVM_LOW)
 
       	repeat(10) begin
+          	pkt = packet::type_id::create("pkt");
+          	start_item(pkt);
        		assert(pkt.randomize() with {SINIT == 0; WR_EN == 1; RD_EN == 0;});
+          	finish_item(pkt);
+          
+          	pkt = packet::type_id::create("pkt");
+          	start_item(pkt);
           	assert(pkt.randomize() with {SINIT == 0; RD_EN == 1; WR_EN == 0;});
+          	finish_item(pkt);
       	end
     endtask : intlv
   
-  	// TODO: acknowledges not always compliments
+  	// illegal requests
+    virtual task il_rq();
+      `uvm_info("SEQ_il_rq", "Starting illegal request", UVM_LOW)
+      
+      	// reset
+      	device_rst();
+      
+      	// background writes
+      	repeat(global_constants::DEPTH - 1) begin
+      		pkt = packet::type_id::create("pkt");
+          	start_item(pkt);
+      		assert(pkt.randomize() with {SINIT == 0; WR_EN == 1; RD_EN == 0;});
+          	finish_item(pkt);
+        end
+
+      	// start actual illegal commands
+      	// write and read requests high at same time
+        pkt = packet::type_id::create("pkt");
+      	start_item(pkt);
+      	pkt.c_legal_cmd.constraint_mode(0);
+		assert(pkt.randomize() with {SINIT == 0; WR_EN == 1; RD_EN == 1;});
+      	finish_item(pkt);
+      
+      	// SINIT high while read is enabled
+        pkt = packet::type_id::create("pkt");
+        start_item(pkt);
+        pkt.c_legal_cmd.constraint_mode(0);
+      	assert(pkt.randomize() with {SINIT == 1; RD_EN == 1; WR_EN == 0;});            	finish_item(pkt);
+
+      	
+		// background read
+      	pkt = packet::type_id::create("pkt");
+      	start_item(pkt);
+      	assert(pkt.randomize() with {SINIT == 0; WR_EN == 0; RD_EN == 1;});
+      	finish_item(pkt);
+    endtask : il_rq
+  
   	// TODO: random
-  	// TODO: fig. 2?
+  	virtual task rand_cmds();
+      `uvm_info("SEQ_rand_cmds", "Starting random commands", UVM_LOW)
+		
+      repeat(100) begin
+          	pkt = packet::type_id::create("pkt");
+        	start_item(pkt);
+          	assert(pkt.randomize());
+        	finish_item(pkt);
+      	end
+    endtask : rand_cmds
 endclass : seq_write
