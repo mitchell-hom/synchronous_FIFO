@@ -11,6 +11,7 @@ This is a repository containing my work verifying my implementation of a synchro
 - clean up to do's
 - write rest of verification plan
 - functional verification
+- check that sequences do what they should via waves
 
 Resources:
 1. [chipverify](https://chipverify.com/uvm/uvm-tutorial)
