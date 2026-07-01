@@ -19,7 +19,7 @@ class driver extends uvm_driver #(packet);
       
 		forever begin
           	// synchronize; wait for clock edge
-          wait(vIf.SINIT == 0);
+            wait(vIf.SINIT == 0);
           	@vIf.CLK;
           
 			// get item from sequencer, drive it to virtual interface
