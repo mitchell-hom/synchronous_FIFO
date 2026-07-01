@@ -12,6 +12,7 @@ This is a repository containing my work verifying my implementation of a synchro
 - write rest of verification plan
 - functional verification
 - check that sequences do what they should via waves
+- fix paths on github
 
 Resources:
 1. [chipverify](https://chipverify.com/uvm/uvm-tutorial)
