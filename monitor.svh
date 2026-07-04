@@ -17,7 +17,9 @@ class monitor extends uvm_monitor;
 		//monAP = new("monAP", this);
 
       	// try to retrieve interface
-      	assert(uvm_config_db#(virtual DS256_if)::get(this, "", "DS256_if", vIf)); 
+      	if (!uvm_config_db#(virtual DS256_if)::get(this, "", "DS256_if", vIf)) begin
+        	`uvm_fatal("MONITOR_NO_VIF", "Could not retrieve virtual interface in monitor")
+        end
 	endfunction : build_phase
 
 	virtual task run_phase(uvm_phase phase);
@@ -27,7 +29,7 @@ class monitor extends uvm_monitor;
       	// class's run phase
 		forever begin
 			// wait for edge of clock, then sample
-          	@(vIf.CLK);
+          	@(vIf.cb);
 			
           	// instantiate packet
           	pkt = packet::type_id::create("pkt");
@@ -36,19 +38,20 @@ class monitor extends uvm_monitor;
 			// needs to be blocking bc pkt isn't persistent;
           	// gets dynamically created and destroyed throughout
           	// simulation
+          	// TODO: check over cb vs standard
 			pkt.DIN = vIf.DIN;
 			pkt.WR_EN = vIf.WR_EN;
 			pkt.RD_EN = vIf.RD_EN;
 			pkt.CLK = vIf.CLK;
 			pkt.SINIT = vIf.SINIT;
-			pkt.FULL = vIf.FULL;
-			pkt.DATA_COUNT = vIf.DATA_COUNT;
-			pkt.WR_ACK = vIf.WR_ACK;
-			pkt.WR_ERR = vIf.WR_ERR;
-			pkt.DOUT = vIf.DOUT;
-			pkt.EMPTY = vIf.EMPTY;
-			pkt.RD_ACK = vIf.RD_ACK;
-			pkt.RD_ERR = vIf.RD_ERR;
+			pkt.FULL = vIf.cb.FULL;
+			pkt.DATA_COUNT = vIf.cb.DATA_COUNT;
+			pkt.WR_ACK = vIf.cb.WR_ACK;
+			pkt.WR_ERR = vIf.cb.WR_ERR;
+			pkt.DOUT = vIf.cb.DOUT;
+			pkt.EMPTY = vIf.cb.EMPTY;
+			pkt.RD_ACK = vIf.cb.RD_ACK;
+			pkt.RD_ERR = vIf.cb.RD_ERR;
 
 			// write to analysis port
 			monAP.write(pkt);
