@@ -3,7 +3,7 @@ class driver extends uvm_driver #(packet);
 
 	virtual DS256_if vIf;
 
-  function new(string name, uvm_component parent); 
+  	function new(string name, uvm_component parent); 
 		super.new(name, parent);
 	endfunction 
 
@@ -11,7 +11,9 @@ class driver extends uvm_driver #(packet);
 	virtual function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
       	// try to retrieve virtual interface; if not, throw error
-      assert(uvm_config_db#(virtual DS256_if)::get(this, "", "DS256_if", vIf));
+      	if (!uvm_config_db#(virtual DS256_if)::get(this, "", "DS256_if", vIf)) begin
+        	`uvm_fatal("DRIVER_NO_VIF", "Could not retrieve virtual interface in driver")
+        end
 	endfunction : build_phase
 
 	virtual task run_phase(uvm_phase phase);
@@ -20,7 +22,7 @@ class driver extends uvm_driver #(packet);
 		forever begin
           	// synchronize; wait for clock edge
             wait(vIf.SINIT == 0);
-          	@vIf.CLK;
+          	@(posedge vIf.CLK); // changed from posedge
           
 			// get item from sequencer, drive it to virtual interface
 			seq_item_port.get_next_item(pkt);
