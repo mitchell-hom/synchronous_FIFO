@@ -11,12 +11,17 @@ interface DS256_if(input bit CLK, input bit SINIT);
 	logic RD_ACK;
 	logic RD_ERR;  
   
+ 
+  	// tb-related
+    int delay = (global_constants::PERIOD / 2);
+  
+  	// sample 1/2 period earlier, to avoid offset in sampling
   	clocking mon_cb @(posedge CLK);
       	// from perspective of tb
       	// input = input to testbench
-    	default input #1step;
+    	default input #delay;
       
       	// gets sampled 1 timestep before clock edge
       	input RD_EN;
-    endclocking : mon_cb
+    endclocking : mon_cb 
 endinterface : DS256_if
