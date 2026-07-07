@@ -10,4 +10,13 @@ interface DS256_if(input bit CLK, input bit SINIT);
 	logic EMPTY;
 	logic RD_ACK;
 	logic RD_ERR;  
+  
+  	clocking mon_cb @(posedge CLK);
+      	// from perspective of tb
+      	// input = input to testbench
+    	default input #1step;
+      
+      	// gets sampled 1 timestep before clock edge
+      	input RD_EN;
+    endclocking : mon_cb
 endinterface : DS256_if
