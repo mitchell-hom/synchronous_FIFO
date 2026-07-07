@@ -22,16 +22,18 @@ class driver extends uvm_driver #(packet);
 		forever begin
           	// synchronize; wait for clock edge
             wait(vIf.SINIT == 0);
-          	@(posedge vIf.CLK); // changed from posedge
+          	
+          	@(negedge vIf.CLK);
+          	seq_item_port.get_next_item(pkt);
+            // drive WR_EN first; needs to be ready before rising edge
+          	vIf.WR_EN <= pkt.WR_EN;
           
-			// get item from sequencer, drive it to virtual interface
-			seq_item_port.get_next_item(pkt);
+			// drive everything else
+          	@(posedge vIf.CLK); 
           
           	// drive contents of packet to interface
 			vIf.DIN <= pkt.DIN;
-			vIf.WR_EN <= pkt.WR_EN;
 			vIf.RD_EN <= pkt.RD_EN;
-			//vIf.SINIT <= pkt.SINIT; // TODO: necessary?
           
           	// handshaking with sequencer; lets it know we're done here
 			seq_item_port.item_done();
