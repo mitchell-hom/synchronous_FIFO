@@ -30,7 +30,7 @@ class monitor extends uvm_monitor;
 		forever begin
 			// wait for edge of clock, then sample
           	@(posedge vIf.CLK); 
-          	#1; // wait for signals to settle
+          	//#1; // wait for signals to settle
 			
           	// instantiate packet
           	pkt = packet::type_id::create("pkt");
@@ -42,7 +42,7 @@ class monitor extends uvm_monitor;
           	// TODO: check over cb vs standard
 			pkt.DIN = vIf.DIN;
 			pkt.WR_EN = vIf.WR_EN;
-			pkt.RD_EN = vIf.RD_EN;
+			pkt.RD_EN = vIf.mon_cb.RD_EN;
 			pkt.CLK = vIf.CLK;
 			pkt.SINIT = vIf.SINIT;
 			pkt.FULL = vIf.FULL;
