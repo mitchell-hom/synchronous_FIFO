@@ -10,11 +10,11 @@ class seq_write extends uvm_sequence #(packet);
 	virtual task body();
     	`uvm_info("seq_write", "Starting body of write sequence", UVM_LOW)
       
-     	multi_wr();
-      	multi_rd();
+     	//multi_wr();
+      	//multi_rd();
       	// TODO: uncomment
       	//device_rst();
-      	//intlv();
+      	intlv();
       	//il_rq();
      	//rand_cmds();
 	endtask : body
@@ -74,11 +74,24 @@ class seq_write extends uvm_sequence #(packet);
       	pkt.SINIT = 0;
       	pkt.WR_EN = 0;
       	pkt.RD_EN = 1;
-      	pkt.DIN = 0;
 
       	finish_item(pkt);
     endtask : READ
   
+  	// wait n clock cycles
+  	task WAIT(int n=1);
+      	repeat(n) begin
+        	pkt = packet::type_id::create("pkt");
+      		start_item(pkt);
+      
+      		pkt.SINIT = 0;
+      		pkt.WR_EN = 0;
+      		pkt.RD_EN = 0;
+      		pkt.DIN = 0;
+      
+      		finish_item(pkt);
+        end
+    endtask : WAIT
   
   
   	// OTHER SEQUENCES ////
@@ -107,7 +120,7 @@ class seq_write extends uvm_sequence #(packet);
   	virtual task intlv();
       	`uvm_info("SEQ_INTLV", "Starting interleave", UVM_LOW)
 
-      	repeat(10) begin
+      repeat(3) begin
           	WRITE();
           	READ();
       	end
@@ -118,7 +131,7 @@ class seq_write extends uvm_sequence #(packet);
       `uvm_info("SEQ_il_rq", "Starting illegal request", UVM_LOW)
       
       	// reset
-      	device_rst();
+      	RESET();
       
       	// background writes
       	repeat(global_constants::DEPTH - 1) begin
