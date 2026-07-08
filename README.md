@@ -3,7 +3,7 @@ UVM testbench for a synchronous FIFO.
 
 Design under test was made by me based on the DS256 synchronous FIFO found [here](https://docs.amd.com/v/u/en-US/sync_fifo).
 
-This is a repository containing my work verifying my implementation of a synchronous FIFO that I wrote myself. The purpose of this is to gain intuition on UVM and secondarily, in writing RTL. This is an ongoing project, so I am learning as I go, and I'm sure I'll find real bugs in my design, which I'm quite excited to address.
+This is a repository containing my work verifying my own implementation of a synchronous FIFO. The purpose of this is to gain intuition on UVM and secondarily, to gain intuition in writing RTL. This is an ongoing project, and I am excited to debug and learn as I go!
 
 # Testbench Overview
 There are a few notable decisions with my testbench that stray from the typical UVM testbenches I've found online (listed below). 
