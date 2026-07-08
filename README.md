@@ -10,11 +10,9 @@ There are a few notable decisions with my testbench that stray from the typical 
 ## Driver
 Let's first consider the driver, which drives in two "stages;" one at the falling edge of the clock and one at the rising edge. 
 
-*
-Spec requires that `WR_EN` be asserted at the rising edge on which data is presented. In the timing diagram provided, it is implied that data is centered on the rising clock edge, which makes sense for a synchronous device. `WR_EN` is deasserted after the rising edge latches its last intended data packet on `DIN` but before the next rising clock edge. That is, anytime between when the last data is sampled and the next valid rising edge of the clock.
+*Spec requires that `WR_EN` be asserted at the rising edge on which data is presented. In the timing diagram provided, it is implied that data is centered on the rising clock edge, which makes sense for a synchronous device. `WR_EN` is deasserted after the rising edge latches its last intended data packet on `DIN` but before the next rising clock edge. That is, anytime between when the last data is sampled and the next valid rising edge of the clock.
 
-`RD_EN`, however, behaves differently. This signal is asserted before the rising edge of the first data packet on `DOUT` and data is not centered on the eye. Instead, the rising edge of the clock is coincident with the switching of the data. So, data is valid after its corresponding rising clock edge until the next rising clock edge. `RD_EN` falling edge is not shown in the timing diagram, but the assumption can be made that it can be deasserted anytime between the last rising edge of the clock for a valid beat of data and the next rising edge of the clock.
-*
+`RD_EN`, however, behaves differently. This signal is asserted before the rising edge of the first data packet on `DOUT` and data is not centered on the eye. Instead, the rising edge of the clock is coincident with the switching of the data. So, data is valid after its corresponding rising clock edge until the next rising clock edge. `RD_EN` falling edge is not shown in the timing diagram, but the assumption can be made that it can be deasserted anytime between the last rising edge of the clock for a valid beat of data and the next rising edge of the clock.*
 
 
 # TODO:
