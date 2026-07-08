@@ -1,7 +1,11 @@
 class scoreboard extends uvm_scoreboard;
 	`uvm_component_utils(scoreboard);
-  
+
   	bit [global_constants::DEPTH-1:0] compare; // compare data
+	bit [global_constants::BUS_WIDTH-1:0] prev_data;
+	bit prev_rd_err, prev wr_err;
+	bit prev_rd_ack, prev_wr_ack;
+	bit prev_sinit;
   	int count; // count of data in fifo
 	int data[$]; // model queue
   	packet pkts[$];
@@ -19,112 +23,145 @@ class scoreboard extends uvm_scoreboard;
 	endfunction : build_phase
        	
 	// checking
-  	virtual function void write(packet pkt);
-      
-      	// RESET
-      	if (pkt.SINIT) begin
-          	// clear queue
-        	data.delete();
-          	count = 0; // TODO: when does this get sampled?
-          
-        // everything else
-      	end else begin
-          	// count 
-          	if (count != pkt.DATA_COUNT) begin
-              	`uvm_error("COUNT", $sformatf("DATA_COUNT incorrect. Expected: %02b Actual: %02b", count, pkt.DATA_COUNT))
-            end else begin
-              	`uvm_info("COUNT", $sformatf("DATA_COUNT correct. Expected: %02b Actual: %02b", count, pkt.DATA_COUNT), UVM_LOW)
-            end
-          
-          	// full
-          	if (count == global_constants::DEPTH) begin
-              	if (pkt.FULL != 1) begin
-                  	`uvm_error("FULL", "FULL not correct for full queue.")
-                end else begin
-                  	`uvm_info("FULL", "FULL correct for full queue.", UVM_LOW)
-                end 
-            end else begin
-              	if (pkt.FULL != 0) begin
-                  	`uvm_error("FULL", "FULL not correct for non-full queue.")
-                end else begin
-                  	`uvm_info("FULL", "FULL correct for non-full queue.", UVM_LOW)
-                end 
-            end
-          
-          	// empty
-          	if (count == 0) begin
-          		if (pkt.EMPTY != 1) begin
-              		`uvm_error("EMPTY", "EMPTY not correct for EMPTY queue.")
-                end else begin
-                  `uvm_info("EMPTY", "EMPTY correct for EMPTY queue.", UVM_LOW)
-                end 
-            end else begin
-              	if (pkt.EMPTY != 0) begin
-                  `uvm_error("EMPTY", "EMPTY not correct for non-empty queue.")
-                end else begin
-                  `uvm_info("EMPTY", "EMPTY correct for non-EMPTY queue.", UVM_LOW)
-                end 
-            end
-          
-          	// ERROR: WR_EN and RD_EN both on
-          	if (pkt.WR_EN & pkt.RD_EN) begin
-            	`uvm_error("WR_RD_EN", "Both WR_EN and RD_EN detected.")
-              
-              	// check error signals
-              	if (pkt.RD_ERR != 1) begin
-                	`uvm_error("RD_ERR", "RD_ERR not HIGH when both WR_EN and RD_EN HIGH")
-              	end
-              
-              	if (pkt.WR_ERR != 1) begin
-                  `uvm_error("WR_ERR", "WR_ERR not HIGH when both WR_EN and RD_EN HIGH")
-                end
-              
-                // check ack signals
-              	if (pkt.RD_ACK != 0 ) begin
-                  `uvm_error("RD_ACK", "RD_ACK not LOW when both WR_EN and RD_EN HIGH")
-                end
-              
-              	if (pkt.WR_ACK != 0) begin
-                  `uvm_error("RD_ACK", "RD_ACK not LOW when both WR_EN and RD_EN HIGH")
-              	end
-              
-              
-            // write
-            end else if (pkt.WR_EN) begin
-              	// ERROR: FULL
-              	if (count >= global_constants::DEPTH) begin
-                  	if (pkt.WR_ERR != 1) begin
-                    	`uvm_error("WR_ERR", "WR_ERR not HIGH when writing to full FIFO.")
-                    end else begin
-                      	`uvm_info("WR_ERR", "WR_ERR correct for write to full FIFO", UVM_LOW)
-                    end
-
-                // no error: add to expected array
-                end else begin
-              		data.push_back(pkt.DIN);
-              		count += 1;
-                end
-              
-              
-             // read
-            end else if (pkt.RD_EN) begin
-              	// ERROR: empty
-              	if (count == 0) begin
-                  	`uvm_error("RD_ERR", "RD_ERR not HIGH when reading from empty FIFO.")
-                    end else begin
-                      `uvm_info("WR_ERR", "RD_ERR correct for read from empty FIFO", UVM_LOW)
-                    end
-                end else begin
-              		compare = data.pop_front();
-              		count -= 1;
-              
-                	// do comparison
-              		if (pkt.DOUT != compare) begin
-            			`uvm_error("SB_READ", $sformatf("Incorrect data received. Expected: %b Actual: %b", compare, pkt.DOUT))
+	virtual function void write(packet pkt);
+		// RESET 
+		if (pkt.SINIT) begin
+			prev_sinit = 1;
+	
+		// not reset; normal operation		
+		end else begin
+			// just transitioned from SINIT
+			if (prev_sinit == 1) begin
+				// reset
+				count = 0;
+				data.delete();
+				prev_rd_ack = 0;
+				prev_rd_err = 0;
+				prev_wr_ack = 0;
+				prev_wr_err = 0;
+				prev_sinit = 0;
+	
+			// didn't just transition from SINIT; normal operation
+			end else begin
+				// compare output pins
+				comp_DATA_COUNT(pkt, count);
+				comp_EMPTY(pkt, (count == 0) ? 1 : 0);
+				comp_FULL(pkt, (count == global_constants::DEPTH) ? 1 : 0);
+				comp_RD_ACK(pkt, prev_rd_ack);
+				comp_RD_ERR(pkt, prev_rd_err);
+				comp_WR_ACK(pkt, prev_wr_ack);
+				comp_WR_ERR(pkt, prev_wr_err);
+	 
+				// compare data
+				if (pkt.WR_EN) begin
+					// not full; do normal write
+					if (count != global_constants::DEPTH) begin
+						data.push_back(pkt.DIN);
+						count += 1;
+						prev_wr_ack = 1;
+						prev_wr_err = 0;
+					// full, can't write
 					end else begin
-                  		`uvm_info("SB_READ", $sformatf("Data received. Expected: %04b Actual: %b", 4'(compare), pkt.DOUT), UVM_LOW)
-                	end // else
-            	end
-        	end
-    endfunction : write
+						prev_wr_ack = 0;
+						prev_wr_err = 1;
+					end
+				end else if (pkt.RD_EN) begin
+					// not empty; do normal read
+					if (count != 0) begin
+						compare = data.pop_front();
+						comp_DOUT(pkt, compare);
+						count -= 1;
+						prev_rd_ack = 1;
+						prev_rd_err = 0;
+						prev_data = pkt.DOUT;
+					// empty, can't read
+					end else begin
+						comp_DOUT(pkt, prev_data);
+						prev_rd_ack = 0;
+						prev_rd_err = 1;
+					end
+				end	
+	
+				// other misc. items
+				// need to make sure data doesn't change unexpectedly out of device
+				if ((!pkt.RD_EN) && (pkt.DOUT != prev_data)) begin
+					`uvm_error("DOUT", $sformatf("DOUT changed unexpectedly. Expected: %b Actual: %b", prev_data, pkt.DOUT))
+				end
+	
+				// no write and read at the same time
+				if (pkt.WR_EN & pkt.RD_EN) begin
+					`uvm_error("WR & RD", "WR_EN and RD_EN enabled at same time.")
+				end
+	
+				if ($countones({pkt.RD_ACK, pkt.RD_ERR, pkt.WR_ACK, pkt.WR_ERR}) > 1) begin
+					`uvm_error("HANDSHAKE_ERR", ">1 *ACK/*ERR signal HIGH")
+				end
+			end
+		end
+	endfunction : write
+	
+	// supporting functions
+	function comp_DATA_COUNT(packet pkt, int count);
+		if (pkt.DATA_COUNT != count) begin
+			`uvm_error("COUNT", $sformatf("DATA_COUNT is incorrect. Expected: %02b Actual: %04b", pkt.DATA_COUNT, count))
+		end else begin
+			`uvm_info("COUNT", $sformatf("DATA_COUNT correct. Expected: %02b Actual: %02b", pkt.DATA_COUNT, count), UVM_LOW)
+		end
+	endfunction : comp_DATA_COUNT
+
+	function comp_DOUT(packet pkt, int compare);
+		if (pkt.DOUT != compare) begin
+	        	`uvm_error("DOUT", $sformatf("Incorrect data received. Expected: %b Actual: %b", compare, pkt.DOUT))
+		end else begin
+	                 `uvm_info("DOUT", $sformatf("Data received. Expected: %04b Actual: %b", 4'(compare), pkt.DOUT), UVM_LOW)
+	       	end 
+	endfunction
+	
+	function comp_EMPTY(packet pkt, int compare);
+		if (pkt.EMPTY != compare) begin
+	        	`uvm_error("EMPTY", $sformatf("Incorrect data received. Expected: %b Actual: %b", compare, pkt.EMPTY))
+		end else begin
+	                 `uvm_info("EMPTY", $sformatf("Data received. Expected: %b Actual: %b", 1'(compare), pkt.EMPTY), UVM_LOW)
+	       	end 
+	endfunction
+
+	function comp_FULL(packet pkt, int compare);
+		if (pkt.FULL != compare) begin
+	        	`uvm_error("FULL", $sformatf("Incorrect data received. Expected: %b Actual: %b", compare, pkt.FULL))
+		end else begin
+	                 `uvm_info("FULL", $sformatf("Data received. Expected: %b Actual: %b", 1'(compare), pkt.FULL), UVM_LOW)
+	       	end 
+	endfunction
+	
+	function comp_RD_ACK(packet pkt, int compare);
+		if (pkt.RD_ACK != compare) begin
+	        	`uvm_error("RD_ACK", $sformatf("Incorrect RD_ACK received. Expected: %01b Actual: %01b", compare, pkt.RD_ACK))
+		end else begin
+	                 `uvm_info("RD_ACK", $sformatf("RD_ACK correct. Expected: %01b Actual: %b", 1'(compare), pkt.RD_ACK), UVM_LOW)
+	       	end 
+	endfunction : comp_RD_ACK
+
+	function comp_RD_ERR(packet pkt, int compare);
+		if (pkt.RD_ERR != compare) begin
+	        	`uvm_error("RD_ERR", $sformatf("Incorrect RD_ERR received. Expected: %01b Actual: %01b", compare, pkt.RD_ERR))
+		end else begin
+	                 `uvm_info("RD_ERR", $sformatf("RD_ERR correct. Expected: %01b Actual: %b", 1'(compare), pkt.RD_ERR), UVM_LOW)
+	       	end 
+	endfunction : comp_RD_ACK
+	
+	function comp_WR_ACK(packet pkt, int compare);
+		if (pkt.WR_ACK != compare) begin
+	        	`uvm_error("WR_ACK", $sformatf("Incorrect WR_ACK received. Expected: %01b Actual: %01b", compare, pkt.WR_ACK))
+		end else begin
+	                 `uvm_info("WR_ACK", $sformatf("WR_ACK correct. Expected: %01b Actual: %b", 1'(compare), pkt.WR_ACK), UVM_LOW)
+	       	end 
+	endfunction : comp_WR_ACK
+
+	function comp_WR_ERR(packet pkt, int compare);
+		if (pkt.WR_ERR != compare) begin
+	        	`uvm_error("WR_ERR", $sformatf("Incorrect WR_ERR received. Expected: %01b Actual: %01b", compare, pkt.WR_ERR))
+		end else begin
+	                 `uvm_info("WR_ERR", $sformatf("WR_ERR correct. Expected: %01b Actual: %b", 1'(compare), pkt.WR_ERR), UVM_LOW)
+	       	end 
+	endfunction : comp_WR_ACK
 endclass : scoreboard
