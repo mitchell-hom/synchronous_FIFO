@@ -3,7 +3,7 @@ class scoreboard extends uvm_scoreboard;
 
   	bit [global_constants::DEPTH-1:0] compare; // compare data
 	bit [global_constants::BUS_WIDTH-1:0] prev_data;
-	bit prev_rd_err, prev wr_err;
+	bit prev_rd_err, prev_wr_err;
 	bit prev_rd_ack, prev_wr_ack;
 	bit prev_sinit;
   	int count; // count of data in fifo
@@ -60,6 +60,8 @@ class scoreboard extends uvm_scoreboard;
 						count += 1;
 						prev_wr_ack = 1;
 						prev_wr_err = 0;
+                      
+                      	`uvm_info("DIN", $sformatf("Data received: %04b", pkt.DIN), UVM_LOW)
 					// full, can't write
 					end else begin
 						prev_wr_ack = 0;
@@ -100,8 +102,10 @@ class scoreboard extends uvm_scoreboard;
 		end
 	endfunction : write
 	
+  
+  
 	// supporting functions
-	function comp_DATA_COUNT(packet pkt, int count);
+	virtual function void comp_DATA_COUNT(packet pkt, int count);
 		if (pkt.DATA_COUNT != count) begin
 			`uvm_error("COUNT", $sformatf("DATA_COUNT is incorrect. Expected: %02b Actual: %04b", pkt.DATA_COUNT, count))
 		end else begin
@@ -109,59 +113,59 @@ class scoreboard extends uvm_scoreboard;
 		end
 	endfunction : comp_DATA_COUNT
 
-	function comp_DOUT(packet pkt, int compare);
+	virtual function void comp_DOUT(packet pkt, int compare);
 		if (pkt.DOUT != compare) begin
 	        	`uvm_error("DOUT", $sformatf("Incorrect data received. Expected: %b Actual: %b", compare, pkt.DOUT))
 		end else begin
 	                 `uvm_info("DOUT", $sformatf("Data received. Expected: %04b Actual: %b", 4'(compare), pkt.DOUT), UVM_LOW)
-	       	end 
+	    end 
 	endfunction
 	
-	function comp_EMPTY(packet pkt, int compare);
+	virtual function void comp_EMPTY(packet pkt, int compare);
 		if (pkt.EMPTY != compare) begin
 	        	`uvm_error("EMPTY", $sformatf("Incorrect data received. Expected: %b Actual: %b", compare, pkt.EMPTY))
 		end else begin
 	                 `uvm_info("EMPTY", $sformatf("Data received. Expected: %b Actual: %b", 1'(compare), pkt.EMPTY), UVM_LOW)
-	       	end 
+	    end 
 	endfunction
 
-	function comp_FULL(packet pkt, int compare);
+  	virtual function void comp_FULL(packet pkt, int compare);
 		if (pkt.FULL != compare) begin
 	        	`uvm_error("FULL", $sformatf("Incorrect data received. Expected: %b Actual: %b", compare, pkt.FULL))
 		end else begin
 	                 `uvm_info("FULL", $sformatf("Data received. Expected: %b Actual: %b", 1'(compare), pkt.FULL), UVM_LOW)
-	       	end 
+	    end 
 	endfunction
 	
-	function comp_RD_ACK(packet pkt, int compare);
+	virtual function void comp_RD_ACK(packet pkt, int compare);
 		if (pkt.RD_ACK != compare) begin
 	        	`uvm_error("RD_ACK", $sformatf("Incorrect RD_ACK received. Expected: %01b Actual: %01b", compare, pkt.RD_ACK))
 		end else begin
 	                 `uvm_info("RD_ACK", $sformatf("RD_ACK correct. Expected: %01b Actual: %b", 1'(compare), pkt.RD_ACK), UVM_LOW)
-	       	end 
+	    end 
 	endfunction : comp_RD_ACK
 
-	function comp_RD_ERR(packet pkt, int compare);
+	virtual function void comp_RD_ERR(packet pkt, int compare);
 		if (pkt.RD_ERR != compare) begin
 	        	`uvm_error("RD_ERR", $sformatf("Incorrect RD_ERR received. Expected: %01b Actual: %01b", compare, pkt.RD_ERR))
 		end else begin
 	                 `uvm_info("RD_ERR", $sformatf("RD_ERR correct. Expected: %01b Actual: %b", 1'(compare), pkt.RD_ERR), UVM_LOW)
-	       	end 
-	endfunction : comp_RD_ACK
+	    end 
+	endfunction : comp_RD_ERR
 	
-	function comp_WR_ACK(packet pkt, int compare);
+	virtual function void comp_WR_ACK(packet pkt, int compare);
 		if (pkt.WR_ACK != compare) begin
 	        	`uvm_error("WR_ACK", $sformatf("Incorrect WR_ACK received. Expected: %01b Actual: %01b", compare, pkt.WR_ACK))
 		end else begin
 	                 `uvm_info("WR_ACK", $sformatf("WR_ACK correct. Expected: %01b Actual: %b", 1'(compare), pkt.WR_ACK), UVM_LOW)
-	       	end 
+	    end 
 	endfunction : comp_WR_ACK
 
-	function comp_WR_ERR(packet pkt, int compare);
+	virtual function void comp_WR_ERR(packet pkt, int compare);
 		if (pkt.WR_ERR != compare) begin
 	        	`uvm_error("WR_ERR", $sformatf("Incorrect WR_ERR received. Expected: %01b Actual: %01b", compare, pkt.WR_ERR))
 		end else begin
 	                 `uvm_info("WR_ERR", $sformatf("WR_ERR correct. Expected: %01b Actual: %b", 1'(compare), pkt.WR_ERR), UVM_LOW)
-	       	end 
-	endfunction : comp_WR_ACK
+	    end 
+	endfunction : comp_WR_ERR
 endclass : scoreboard
