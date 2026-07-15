@@ -107,7 +107,7 @@ class scoreboard extends uvm_scoreboard;
 	// supporting functions
 	virtual function void comp_DATA_COUNT(packet pkt, int count);
 		if (pkt.DATA_COUNT != count) begin
-			`uvm_error("COUNT", $sformatf("DATA_COUNT is incorrect. Expected: %02b Actual: %04b", pkt.DATA_COUNT, count))
+          `uvm_error("COUNT", $sformatf("DATA_COUNT is incorrect. Expected: %02b Actual: %02b", pkt.DATA_COUNT, count))
 		end else begin
 			`uvm_info("COUNT", $sformatf("DATA_COUNT correct. Expected: %02b Actual: %02b", pkt.DATA_COUNT, count), UVM_LOW)
 		end
@@ -123,17 +123,17 @@ class scoreboard extends uvm_scoreboard;
 	
 	virtual function void comp_EMPTY(packet pkt, int compare);
 		if (pkt.EMPTY != compare) begin
-	        	`uvm_error("EMPTY", $sformatf("Incorrect data received. Expected: %b Actual: %b", compare, pkt.EMPTY))
+          `uvm_error("EMPTY", $sformatf("Incorrect data received. Expected: %01b Actual: %b", compare, pkt.EMPTY))
 		end else begin
-	                 `uvm_info("EMPTY", $sformatf("Data received. Expected: %b Actual: %b", 1'(compare), pkt.EMPTY), UVM_LOW)
+          `uvm_info("EMPTY", $sformatf("Data received. Expected: %01b Actual: %b", 1'(compare), pkt.EMPTY), UVM_LOW)
 	    end 
 	endfunction
 
   	virtual function void comp_FULL(packet pkt, int compare);
 		if (pkt.FULL != compare) begin
-	        	`uvm_error("FULL", $sformatf("Incorrect data received. Expected: %b Actual: %b", compare, pkt.FULL))
+          `uvm_error("FULL", $sformatf("Incorrect data received. Expected: %01b Actual: %b", compare, pkt.FULL))
 		end else begin
-	                 `uvm_info("FULL", $sformatf("Data received. Expected: %b Actual: %b", 1'(compare), pkt.FULL), UVM_LOW)
+          `uvm_info("FULL", $sformatf("Data received. Expected: %01b Actual: %b", 1'(compare), pkt.FULL), UVM_LOW)
 	    end 
 	endfunction
 	
