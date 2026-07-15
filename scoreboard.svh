@@ -51,6 +51,12 @@ class scoreboard extends uvm_scoreboard;
 				comp_RD_ERR(pkt, prev_rd_err);
 				comp_WR_ACK(pkt, prev_wr_ack);
 				comp_WR_ERR(pkt, prev_wr_err);
+              
+              	// reset
+              	prev_rd_ack = 0;
+              	prev_rd_err = 0;
+              	prev_wr_ack = 0;
+              	prev_wr_err = 0;
 	 
 				// compare data
 				if (pkt.WR_EN) begin
