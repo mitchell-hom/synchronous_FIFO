@@ -33,21 +33,22 @@ module DS256 (	input [global_constants::BUS_WIDTH-1:0] DIN,
 			wPtr <= 0; 
 			rPtr <= 0;
 			count <= 0;	
+          
+          	fullFlag <= 0;
+          	emptyFlag <= 1;
 
 			// reset output pins
-			DATA_COUNT <= 0;		
+			//DATA_COUNT <= 0;		
 			EMPTY <= 1;
 			FULL <= 0;
 
 		// no SINIT; normal operation
-		end else begin	
-          	if (count == '0) begin
-            	FULL <= 0;
-              	EMPTY <= 1;
-            end else if (count == global_constants::DEPTH) begin
-              	FULL <= 1;
-              	EMPTY <= 0;
-            end
+		end else begin
+          	// reset handshaking
+          	WR_ACK <= 0;
+          	WR_ERR <= 0;
+          	RD_ACK <= 0;
+          	RD_ERR <= 0;
           
 			// WRITE operation
 			if (WR_EN) begin
@@ -61,7 +62,8 @@ module DS256 (	input [global_constants::BUS_WIDTH-1:0] DIN,
 					array[wPtr] <= DIN;
 
 					// update pointer
-					wPtr <= wPtr + 1;
+                  	wPtr <= (wPtr == global_constants::DEPTH-1) ? 0 : wPtr + 1;
+					//wPtr <= wPtr + 1;
 					count <= count + 1;
 
 					// set output pins
@@ -82,26 +84,41 @@ module DS256 (	input [global_constants::BUS_WIDTH-1:0] DIN,
 					DOUT <= array[rPtr];
 
 					// update pointer
-					rPtr <= rPtr + 1;
+					//rPtr <= rPtr + 1;
+                 	rPtr <= (rPtr == global_constants::DEPTH-1) ? 0 : rPtr + 1;
 					count <= count - 1;
 
 					// set output pins
 					RD_ACK <= 1;
 					RD_ERR <= 0;
 				end 
-			end // WRITE operation
+			end // READ operation
+          
+          	// full/empty handshaking
+            if (count == '0) begin
+            	FULL <= 0;
+              	fullFlag <= 0;
+              	EMPTY <= 1;
+              	emptyFlag <= 0;
+            end else if (count == global_constants::DEPTH) begin
+              	FULL <= 1;
+              	fullFlag <= 1;
+              	EMPTY <= 0;
+              	emptyFlag <= 0;
+            end else begin
+              	FULL <= 0;
+              	fullFlag <= 0;
+              	EMPTY <= 0;
+              	emptyFlag <= 0;
+            end
 		end // normal operation (non-reset)	
 	end // always_ff...
-
-	// TODO can't write to same variable in combinational block and sequential
-	// block, so need to implement this elsewhere
-	/*
-	always_comb begin
-		fullFlag = count == global_constants::DEPTH - 1;
-		FULL = fullFlag;
-
-		emptyFlag = count == 0;
-		EMPTY = emptyFlag;
-	end // always_comb
-	*/
+  
+  	always_comb begin
+    	if (SINIT) begin
+      		DATA_COUNT = 0;
+      	end else begin
+        	DATA_COUNT = count;
+      end
+    end
 endmodule : DS256;
