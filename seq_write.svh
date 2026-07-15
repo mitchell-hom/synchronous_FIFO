@@ -10,11 +10,11 @@ class seq_write extends uvm_sequence #(packet);
 	virtual task body();
     	`uvm_info("seq_write", "Starting body of write sequence", UVM_LOW)
       
-     	//multi_wr();
+     	multi_wr();
       	//multi_rd();
       	// TODO: uncomment
       	//device_rst();
-      	intlv();
+      	//intlv();
       	//il_rq();
      	//rand_cmds();
 	endtask : body
