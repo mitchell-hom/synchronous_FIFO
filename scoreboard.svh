@@ -58,8 +58,12 @@ class scoreboard extends uvm_scoreboard;
               	prev_wr_ack = 0;
               	prev_wr_err = 0;
 	 
-				// compare data
-				if (pkt.WR_EN) begin
+              	// no write and read at the same time
+				if (pkt.WR_EN & pkt.RD_EN) begin
+					`uvm_error("WR & RD", "WR_EN and RD_EN enabled at same time.")
+                  	prev_wr_err = 1;
+                  	prev_rd_err = 1;
+				end else if (pkt.WR_EN) begin
 					// not full; do normal write
 					if (count != global_constants::DEPTH) begin
 						data.push_back(pkt.DIN);
@@ -96,11 +100,7 @@ class scoreboard extends uvm_scoreboard;
 					`uvm_error("DOUT", $sformatf("DOUT changed unexpectedly. Expected: %b Actual: %b", prev_data, pkt.DOUT))
 				end
 	
-				// no write and read at the same time
-				if (pkt.WR_EN & pkt.RD_EN) begin
-					`uvm_error("WR & RD", "WR_EN and RD_EN enabled at same time.")
-				end
-	
+              	// TODO fix this; should be able to have rd and wr err at the same time
 				if ($countones({pkt.RD_ACK, pkt.RD_ERR, pkt.WR_ACK, pkt.WR_ERR}) > 1) begin
 					`uvm_error("HANDSHAKE_ERR", ">1 *ACK/*ERR signal HIGH")
 				end
@@ -121,7 +121,7 @@ class scoreboard extends uvm_scoreboard;
 
 	virtual function void comp_DOUT(packet pkt, int compare);
 		if (pkt.DOUT != compare) begin
-	        	`uvm_error("DOUT", $sformatf("Incorrect data received. Expected: %b Actual: %b", compare, pkt.DOUT))
+          `uvm_error("DOUT", $sformatf("Incorrect data received. Expected: %04b Actual: %b", compare, pkt.DOUT))
 		end else begin
 	                 `uvm_info("DOUT", $sformatf("Data received. Expected: %04b Actual: %b", 4'(compare), pkt.DOUT), UVM_LOW)
 	    end 
