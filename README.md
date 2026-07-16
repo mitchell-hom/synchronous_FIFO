@@ -21,7 +21,15 @@ In order to gain intuition on the passing of packets between testbench compoenen
 
 During a write, `WR_EN` is asserted high at the rising edge on which data is presented. In the timing diagram provided, it is implied that data is centered on the rising clock edge, meaning that it is sampled in the middle of a data eye. However, for the purposes of simplicity, I have implemented the stimulus such that both `DIN` and `WR_EN` are asserted at the same time at the rising edge of the clock. Because this happens using nonblocking assignment, it means that the data isn't available to the device until that timestep is over. This is sufficient for the testbench's purposes because in the worst-case scenario, a write followed immediately by a read, `RD_EN` would be asserted at the rising edge at which data is really latched by the device (the one after the pins are wiggled), and the device would respond with read data on the following edge. Thus, on the timestep in which `RD_EN` is asserted, it would latch the contents of `DIN`.
 
+`WR_EN` is deasserted on the rising edge on which it is no longer needed; that is, on the rising edge the data is latched. Again, because the data is presented using nonblocking assignment, this rising edge will cause the data to be latched on this edge, but the following one will not latch data any longer.
 
+During a read, `RD_EN` is also asserted high on a rising edge. Because this occurs using nonblocking assignment, the device would respond on the following rising edge of the clock. This is in line with the specification because it states that `RD_EN` should be asserted prior to a rising clock edge. Again, for the sake of simplicity, I have chosen to avoid sending data in two stages with the driver. Thus, read data is presented one clock cycle after the enable signal and coincident with the rising edge of the clock.
+
+`RD_EN` is deasserted on the rising edge similarly to its write counterpart.
+
+`DOUT` would be asserted in this implementation using nonblocking assignment. This presents an interesting question that I would like to research: should a verification engineer consider the implementation during design of a testbench? Presumably, a DUT could use either, and it would be best to be implementation-agnostic in verification. However, with sampling and assignment happening in different times during a timestep, race conditions or unexpected results could occur.
+
+In this implementation, `DOUT` would be sampled by the monitor before it gets asserted at the end of the timestep by the DUT. Thus, the read expect data needs to be a clock cycle skewed in comparison to the actual packets being sent.
 
 *Spec requires that `WR_EN` be asserted at the rising edge on which data is presented. In the timing diagram provided, it is implied that data is centered on the rising clock edge, which makes sense for a synchronous device. `WR_EN` is deasserted after the rising edge latches its last intended data packet on `DIN` but before the next rising clock edge. That is, anytime between when the last data is sampled and the next valid rising edge of the clock.*
 
