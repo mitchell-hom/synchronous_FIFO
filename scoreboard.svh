@@ -33,6 +33,7 @@ class scoreboard extends uvm_scoreboard;
           	prev_wr_err = 0;
           	rd_ack = 0;
           	rd_err = 0;
+          	// TODO: do compare?
         end else begin
             // compare data out
             // do comparison at every rising edge rather than
@@ -40,7 +41,9 @@ class scoreboard extends uvm_scoreboard;
             // it is holding its previous data like a latch
             comp_DOUT(pkt, compare); // compare only gets changed here/read
           
+          	$display(count);
           	// compare handshaking
+          	comp_DATA_COUNT(pkt, count); // sampled like wr_* signals
           	comp_WR_ACK(pkt, prev_wr_ack);
           	comp_WR_ERR(pkt, prev_wr_err);
             comp_RD_ACK(pkt, rd_ack);
@@ -58,7 +61,7 @@ class scoreboard extends uvm_scoreboard;
             // WRITE OPERATION
             end else if (pkt.WR_EN) begin
               	// NOT FULL; do normal write
-              if (count < global_constants::DEPTH) begin
+              	if (count < global_constants::DEPTH) begin
                 	data.push_back(pkt.DIN);
                   
                 	//$display(count);
@@ -97,9 +100,9 @@ class scoreboard extends uvm_scoreboard;
 	// supporting functions
 	virtual function void comp_DATA_COUNT(packet pkt, int count);
 		if (pkt.DATA_COUNT != count) begin
-          `uvm_error("COUNT", $sformatf("DATA_COUNT is incorrect. Expected: %02b Actual: %02b", pkt.DATA_COUNT, count))
+          `uvm_error("COUNT", $sformatf("DATA_COUNT is incorrect. Expected: %03b Actual: %03b", count, pkt.DATA_COUNT))
 		end else begin
-			`uvm_info("COUNT", $sformatf("DATA_COUNT correct. Expected: %02b Actual: %02b", pkt.DATA_COUNT, count), UVM_LOW)
+          `uvm_info("COUNT", $sformatf("DATA_COUNT correct. Expected: %03b Actual: %03b", count, pkt.DATA_COUNT), UVM_LOW)
 		end
 	endfunction : comp_DATA_COUNT
 
