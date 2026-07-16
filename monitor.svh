@@ -53,7 +53,6 @@ class monitor extends uvm_monitor;
           
           	//#1; // offset for read
           	pkt.DOUT = vIf.DOUT;
-          	// TODO: offset for ack/err???
 
 			// write to analysis port
 			monAP.write(pkt);
