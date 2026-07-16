@@ -31,9 +31,6 @@ During a read, `RD_EN` is also asserted high on a rising edge. Because this occu
 
 In this implementation, `DOUT` would be sampled by the monitor before it gets asserted at the end of the timestep by the DUT. Thus, the read expect data needs to be a clock cycle skewed in comparison to the actual packets being sent.
 
-*Spec requires that `WR_EN` be asserted at the rising edge on which data is presented. In the timing diagram provided, it is implied that data is centered on the rising clock edge, which makes sense for a synchronous device. `WR_EN` is deasserted after the rising edge latches its last intended data packet on `DIN` but before the next rising clock edge. That is, anytime between when the last data is sampled and the next valid rising edge of the clock.*
-
-*`RD_EN`, however, behaves differently. This signal is asserted before the rising edge of the first data packet on `DOUT` and data is not centered on the eye. Instead, the rising edge of the clock is coincident with the switching of the data. So, data is valid after its corresponding rising clock edge until the next rising clock edge. `RD_EN` falling edge is not shown in the timing diagram, but the assumption can be made that it can be deasserted anytime between the last rising edge of the clock for a valid beat of data and the next rising edge of the clock.*
 
 ## Interface ##
 The interface contains a clocking block which allows the monitor to sample `RD_EN` 1/2 period earlier at the falling edge.
