@@ -11,7 +11,7 @@ class seq_write extends uvm_sequence #(packet);
     	`uvm_info("seq_write", "Starting body of write sequence", UVM_LOW)
       
      	multi_wr();
-      	//multi_rd();
+      	multi_rd();
       	// TODO: uncomment
       	//device_rst();
       	//intlv();
