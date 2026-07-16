@@ -3,6 +3,7 @@ class scoreboard extends uvm_scoreboard;
 
   	bit [global_constants::DEPTH-1:0] compare; // compare data
 	bit [global_constants::BUS_WIDTH-1:0] prev_data;
+  	bit empty, full;
 	bit rd_err, prev_wr_err;
 	bit rd_ack, prev_wr_ack;
 	bit prev_sinit;
@@ -29,6 +30,9 @@ class scoreboard extends uvm_scoreboard;
           	data.delete();
           	prev_sinit = 1;
           
+          	empty = 1;
+          	full = 0;
+          
    			prev_wr_ack = 0;
           	prev_wr_err = 0;
           	rd_ack = 0;
@@ -41,9 +45,10 @@ class scoreboard extends uvm_scoreboard;
             // it is holding its previous data like a latch
             comp_DOUT(pkt, compare); // compare only gets changed here/read
           
-          	$display(count);
           	// compare handshaking
           	comp_DATA_COUNT(pkt, count); // sampled like wr_* signals
+          	comp_EMPTY(pkt, empty);
+          	comp_FULL(pkt, full);
           	comp_WR_ACK(pkt, prev_wr_ack);
           	comp_WR_ERR(pkt, prev_wr_err);
             comp_RD_ACK(pkt, rd_ack);
@@ -85,6 +90,7 @@ class scoreboard extends uvm_scoreboard;
                   	count -= 1;
                 	rd_ack = 1; // flag to show we read
                   	rd_err = 0;
+                  
                 // EMPTY
                 end else begin
                   	// don't change compare
@@ -92,6 +98,10 @@ class scoreboard extends uvm_scoreboard;
                   	rd_err = 1;
                 end
             end
+          
+          	// update based on count
+          	empty = (count == 0) ? 1 : 0;
+          	full = (count == global_constants::DEPTH) ? 1 : 0;
         end // normal operation
 	endfunction : write
 	
