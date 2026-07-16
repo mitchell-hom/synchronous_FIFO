@@ -51,7 +51,7 @@ class monitor extends uvm_monitor;
 			pkt.RD_ACK = vIf.RD_ACK;
 			pkt.RD_ERR = vIf.RD_ERR;
           
-          	#1; // offset for read
+          	//#1; // offset for read
           	pkt.DOUT = vIf.DOUT;
           	// TODO: offset for ack/err???
 
