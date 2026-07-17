@@ -22,8 +22,7 @@ module DS256 (	input [global_constants::BUS_WIDTH-1:0] DIN,
 
 	bit [global_constants::COUNT_BITS-1:0] count;
 	bit [global_constants::DEPTH-1:0] rPtr, wPtr;
-	reg [global_constants::DEPTH-1:0] array [global_constants::BUS_WIDTH-1:0];
-	reg fullFlag, emptyFlag;
+  	reg [global_constants::BUS_WIDTH-1:0] array [global_constants::DEPTH-1:0];
 
 	always_ff @(posedge CLK) begin
 		// SINIT; synchronous reset
@@ -33,9 +32,6 @@ module DS256 (	input [global_constants::BUS_WIDTH-1:0] DIN,
 			wPtr <= 0; 
 			rPtr <= 0;
 			count <= 0;	
-          
-          	fullFlag <= 0;
-          	emptyFlag <= 1;
 
 			// reset output pins
 			//DATA_COUNT <= 0;		
@@ -50,10 +46,16 @@ module DS256 (	input [global_constants::BUS_WIDTH-1:0] DIN,
           	RD_ACK <= 0;
           	RD_ERR <= 0;
           
+          	// both enabled; error
+          	if (WR_EN & RD_EN) begin
+            	WR_ACK <= 0;
+              	WR_ERR <= 1;
+              	RD_ACK <= 0;
+              	RD_ERR <= 1;
 			// WRITE operation
-			if (WR_EN) begin
+          	end else if (WR_EN) begin
 				// ERRORS
-				if (fullFlag | RD_EN) begin
+              	if (count >= global_constants::DEPTH | RD_EN) begin
 					WR_ERR <= 1;
 					WR_ACK <= 0;
 				// no error; do a write
@@ -62,20 +64,35 @@ module DS256 (	input [global_constants::BUS_WIDTH-1:0] DIN,
 					array[wPtr] <= DIN;
 
 					// update pointer
-                  	wPtr <= (wPtr == global_constants::DEPTH-1) ? 0 : wPtr + 1;
-					//wPtr <= wPtr + 1;
-					count <= count + 1;
+                  	wPtr <= (wPtr > global_constants::DEPTH-2) ? 0 : wPtr + 1;
+                  	count <= count + 1;
 
 					// set output pins
+                  	DATA_COUNT <= count + 1; // needs this b/c of nba
 					WR_ACK <= 1;
-					WR_ERR <= 0;		
-				end
-			end // WRITE operation
+					WR_ERR <= 0;
+                  	// full/empty
+                	// EMPTY
+                  if (count + 1 == 0) begin
+                    	FULL <= 0;
+                    	EMPTY <= 1;
 
-			// READ operation
-			if (RD_EN) begin
+                	// FULL
+                    end else if (count + 1 == global_constants::DEPTH) begin
+                    	FULL <= 1;
+                    	EMPTY <= 0;
+
+                	// NEITHER
+                	end else begin
+                    	FULL <= 0;
+                    	EMPTY <= 0;
+                	end // full/empty handshaking  
+				end // no error
+              
+            // READ operation
+			end else if (RD_EN) begin
 				// ERRORS
-				if (emptyFlag | WR_EN) begin
+              	if (count <= 0 | WR_EN) begin
 					RD_ERR <= 1;
 					RD_ACK <= 0;
 				// no error; do a read
@@ -84,41 +101,31 @@ module DS256 (	input [global_constants::BUS_WIDTH-1:0] DIN,
 					DOUT <= array[rPtr];
 
 					// update pointer
-					//rPtr <= rPtr + 1;
-                 	rPtr <= (rPtr == global_constants::DEPTH-1) ? 0 : rPtr + 1;
-					count <= count - 1;
+                  	rPtr <= (rPtr > global_constants::DEPTH-2) ? 0 : rPtr + 1;
+                  	count <= count - 1;
 
 					// set output pins
+                  	DATA_COUNT <= count - 1; // b/c of nba
 					RD_ACK <= 1;
 					RD_ERR <= 0;
-				end 
+                  	//full/empty
+                  	// EMPTY
+                  	if (count - 1 == 0) begin
+                    	FULL <= 0;
+                    	EMPTY <= 1;
+
+                	// FULL
+                    end else if (count - 1 == global_constants::DEPTH) begin
+                    	FULL <= 1;
+                    	EMPTY <= 0;
+
+                	// NEITHER
+                	end else begin
+                    	FULL <= 0;
+                    	EMPTY <= 0;
+                	end // full/empty handshaking  
+				end // no errors
 			end // READ operation
-          
-          	// full/empty handshaking
-            if (count == '0) begin
-            	FULL <= 0;
-              	fullFlag <= 0;
-              	EMPTY <= 1;
-              	emptyFlag <= 0;
-            end else if (count == global_constants::DEPTH) begin
-              	FULL <= 1;
-              	fullFlag <= 1;
-              	EMPTY <= 0;
-              	emptyFlag <= 0;
-            end else begin
-              	FULL <= 0;
-              	fullFlag <= 0;
-              	EMPTY <= 0;
-              	emptyFlag <= 0;
-            end
 		end // normal operation (non-reset)	
 	end // always_ff...
-  
-  	always_comb begin
-    	if (SINIT) begin
-      		DATA_COUNT = 0;
-      	end else begin
-        	DATA_COUNT = count;
-      end
-    end
 endmodule : DS256;
