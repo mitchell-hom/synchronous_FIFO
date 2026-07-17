@@ -14,8 +14,6 @@ class monitor extends uvm_monitor;
 	virtual function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
 
-		//monAP = new("monAP", this);
-
       	// try to retrieve interface
       	if (!uvm_config_db#(virtual DS256_if)::get(this, "", "DS256_if", vIf)) begin
         	`uvm_fatal("MONITOR_NO_VIF", "Could not retrieve virtual interface in monitor")
@@ -47,12 +45,10 @@ class monitor extends uvm_monitor;
 			pkt.DATA_COUNT = vIf.DATA_COUNT;
 			pkt.WR_ACK = vIf.WR_ACK;
 			pkt.WR_ERR = vIf.WR_ERR;
+            pkt.DOUT = vIf.DOUT;
 			pkt.EMPTY = vIf.EMPTY;
 			pkt.RD_ACK = vIf.RD_ACK;
 			pkt.RD_ERR = vIf.RD_ERR;
-          
-          	//#1; // offset for read
-          	pkt.DOUT = vIf.DOUT;
 
 			// write to analysis port
 			monAP.write(pkt);
