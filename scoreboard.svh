@@ -37,7 +37,7 @@ class scoreboard extends uvm_scoreboard;
           	prev_wr_err = 0;
           	rd_ack = 0;
           	rd_err = 0;
-          	// TODO: do compare?
+          
         end else begin
             // compare data out
             // do comparison at every rising edge rather than
@@ -59,9 +59,13 @@ class scoreboard extends uvm_scoreboard;
           	rd_ack = 0;
           	rd_err = 0;
 
-            // TODO handling for both enabled at once
+            // handling for both enabled at once
             if (pkt.WR_EN && pkt.RD_EN) begin
                 `uvm_error("WR & RD", "WR_EN and RD_EN enabled at same time.")
+              	prev_wr_ack = 0;
+              	prev_wr_err = 1;
+              	rd_ack = 0;
+              	rd_err = 1;
 
             // WRITE OPERATION
             end else if (pkt.WR_EN) begin
