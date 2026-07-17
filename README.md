@@ -5,8 +5,13 @@ Design under test was made by me based on the DS256 synchronous FIFO found [here
 
 This is a repository containing my work verifying my own implementation of a synchronous FIFO. The purpose of this is to gain intuition on UVM and secondarily, to gain intuition in writing RTL. This is an ongoing project, and I am excited to debug and learn as I go!
 
-# Testbench Overview
-There are a few notable decisions with my testbench that stray from the typical UVM testbenches I've found online (listed below). 
+# Testbench Overview/Status
+This design currently passes my verification. I created directed tests that tested repeated writes, reads, interleaved writes and reads, illegal commands, and also constrained random sequences. This took some iteration with the design of the DUT, but I am happy to say that the design now passes.
+
+The next step would be to also implement functional coverage and code coverage metrics to determine whether and where my verification plan needs improvement. I plan to do this soon.
+
+Following is a summary of how the testbench works:
+
 ## Passing Transaction Items (Packets)
 - Driver:
   - drives inputs to DUT on rising edge of clock
@@ -31,16 +36,9 @@ During a read, `RD_EN` is also asserted high on a rising edge. Because this occu
 
 In this implementation, `DOUT` would be sampled by the monitor before it gets asserted at the end of the timestep by the DUT. Thus, the read expect data needs to be a clock cycle skewed in comparison to the actual packets being sent.
 
-
-## Interface ##
-The interface contains a clocking block which allows the monitor to sample `RD_EN` 1/2 period earlier at the falling edge.
-
 # TODO:
 - clean up to do's
-- functional verification
-- check that sequences do what they should via waves
-- verify scoreboard function
-- verify design
+- functional coverage metrics
 
 Resources:
 1. [chipverify](https://chipverify.com/uvm/uvm-tutorial)
