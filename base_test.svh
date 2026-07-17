@@ -39,7 +39,6 @@ class base_test extends uvm_test;
 
 		// run 
 		Iwrite.start(Ienvironment.Iagent.Isequencer);
-      	// TODO add uvm info here
       	#30;
       
 		// can end now
