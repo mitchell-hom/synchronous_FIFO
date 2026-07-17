@@ -12,11 +12,10 @@ class seq_write extends uvm_sequence #(packet);
       
      	multi_wr();
       	multi_rd();
-      	// TODO: uncomment
-      	//device_rst();
-      	//intlv();
-      	//il_rq();
-     	//rand_cmds();
+      	RESET();
+      	intlv();
+      	il_rq();
+     	rand_cmds();
 	endtask : body
  	
   
@@ -101,7 +100,7 @@ class seq_write extends uvm_sequence #(packet);
       	`uvm_info("SEQ_WRITE", "Starting multi write", UVM_LOW)
 
       	// do writes until full, then overflow it 
-      	repeat(global_constants::DEPTH + 1) begin
+      	repeat(global_constants::DEPTH * 2) begin
         	WRITE();
       	end
     endtask : multi_wr
@@ -111,7 +110,7 @@ class seq_write extends uvm_sequence #(packet);
       	`uvm_info("SEQ_READ", "Starting multi read", UVM_LOW)
 
       	// do reads until empty, then continue
-        repeat(global_constants::DEPTH + 1) begin
+      	repeat(global_constants::DEPTH * 2) begin
           	READ();
       	end
     endtask : multi_rd
@@ -120,7 +119,7 @@ class seq_write extends uvm_sequence #(packet);
   	virtual task intlv();
       	`uvm_info("SEQ_INTLV", "Starting interleave", UVM_LOW)
 
-      repeat(3) begin
+      repeat(15) begin
           	WRITE();
           	READ();
       	end
@@ -162,11 +161,10 @@ class seq_write extends uvm_sequence #(packet);
       	READ();
     endtask : il_rq
   
-  	// TODO: random
   	virtual task rand_cmds();
       `uvm_info("SEQ_rand_cmds", "Starting random commands", UVM_LOW)
 		
-      repeat(100) begin
+      	repeat(100) begin
           	pkt = packet::type_id::create("pkt");
         	start_item(pkt);
         	if (!pkt.randomize()) begin
