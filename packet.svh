@@ -57,49 +57,4 @@ class packet extends uvm_sequence_item;
         }
       }
   	}
-  
-  	// supporting functions
-  	function bit is_write();
-      	if (!SINIT && WR_EN && !RD_EN) begin
-      		return 1;
-        end else begin
-          	return 0;
-        end
-    endfunction : is_write
-          
-    function bit is_read();
-      	if (!SINIT && RD_EN && !WR_EN) begin
-      		return 1;
-        end else begin
-          	return 0;
-        end
-    endfunction : is_read
-  
-  	function bit is_wr_error();
-      	if (WR_EN) begin
-          	if (DATA_COUNT == global_constants::DEPTH) begin
-            	return 1;
-            end else if (SINIT == 1) begin
-              	return 1;
-            end else if (RD_EN == 1) begin
-              	return 1;
-            end
-      	end else begin
-          	return 0;
-        end
-  	endfunction : is_wr_error
-  
-    function bit is_rd_error();
-      	if (RD_EN) begin
-          	if (DATA_COUNT == 0) begin
-            	return 1;
-            end else if (SINIT == 1) begin
-              	return 1;
-            end else if (WR_EN == 1) begin
-              	return 1;
-            end
-      	end else begin
-          	return 0;
-        end
-  	endfunction : is_rd_error
 endclass : packet
