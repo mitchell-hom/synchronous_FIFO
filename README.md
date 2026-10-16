@@ -36,9 +36,6 @@ During a read, `RD_EN` is also asserted high on a rising edge. Because this occu
 
 In this implementation, `DOUT` would be sampled by the monitor before it gets asserted at the end of the timestep by the DUT. Thus, the read expect data needs to be a clock cycle skewed in comparison to the actual packets being sent.
 
-# TODO:
-- clean up to do's
-- functional coverage metrics
 
 Resources:
 1. [chipverify](https://chipverify.com/uvm/uvm-tutorial)
