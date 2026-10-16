@@ -46,17 +46,15 @@ class seq_write extends uvm_sequence #(packet);
   	virtual task RESET();
     	`uvm_info("SEQ_RST", "Starting device reset", UVM_LOW)
 
-      	repeat(2) begin
-            pkt = packet::type_id::create("pkt");
-            start_item(pkt);
+        pkt = packet::type_id::create("pkt");
+        start_item(pkt);
 
-            pkt.rand_mode(0);
-            pkt.WR_EN = 0;
-            pkt.RD_EN = 0;
-            pkt.SINIT = 1;
+        pkt.rand_mode(0);
+        pkt.WR_EN = 0;
+        pkt.RD_EN = 0;
+        pkt.SINIT = 1;
 
-            finish_item(pkt);
-        end
+        finish_item(pkt);
     
     	pkt = packet::type_id::create("pkt");
     	start_item(pkt);
