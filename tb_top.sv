@@ -5,12 +5,12 @@ import uvm_pkg::*;
 import DS256_env_pkg::*;
 
 module tb_top;
-	logic clk, sinit;
+	logic clk;
   
   	// clock generation at specified frequency
   always #(global_constants::PERIOD / 2) clk =~ clk;
 
-	DS256_if Iif(clk, sinit);
+	DS256_if Iif(clk);
 	DS256 Idut(	.CLK(Iif.CLK), 
 			.DIN(Iif.DIN),
 			.WR_EN(Iif.WR_EN),
@@ -35,7 +35,7 @@ module tb_top;
   	// initialize values
   	initial begin
       	clk = 0;
-      	sinit = 1;
+      	Iif.SINIT = 1;
       
       	// testing this
       	Iif.DIN = '0;
@@ -43,7 +43,7 @@ module tb_top;
       	Iif.RD_EN = 0;
       
       	#(global_constants::PERIOD);
-      	sinit = 0;
+      	Iif.SINIT = 0;
     end      	
 
 	// write wave data to output file
