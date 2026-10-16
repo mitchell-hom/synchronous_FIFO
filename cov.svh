@@ -135,14 +135,10 @@ class cov extends uvm_component;
             bins true = {1};
             bins false = {0};
         }
-    endgroup : all_pins
       
-  	
-      // TODO: all edge transitions?
-      // TODO: enter all states?
-          // write
-          // read
-          // wr && rd
-          // illegal commands
-      // cross-coverage?
+        // CROSS COVERAGE
+  		wr_rd_cross : cross cp_RD_EN, cp_WR_EN;
+  		wr_din_cross : cross cp_DIN, cp_WR_EN;
+  		rd_dout_cross : cross cp_DOUT, cp_RD_EN;
+    endgroup : all_pins
 endclass : cov
