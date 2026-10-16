@@ -6,11 +6,9 @@ Design under test was made by me based on the DS256 synchronous FIFO found [here
 This is a repository containing my work verifying my own implementation of a synchronous FIFO. The purpose of this is to gain intuition on UVM and secondarily, to gain intuition in writing RTL. This is an ongoing project, and I am excited to debug and learn as I go!
 
 # Testbench Overview/Status
-This design currently passes my verification. I created directed tests that tested repeated writes, reads, interleaved writes and reads, illegal commands, and also constrained random sequences. This took some iteration with the design of the DUT, but I am happy to say that the design now passes.
+This design currently passes my verification. I created directed tests that tested repeated writes, reads, interleaved writes and reads, illegal commands, and more, and also constrained random sequences. This took some iteration with the design of the DUT, but I am happy to say that the design now passes.
 
-I've added some functional coverage and code coverage via a coverage collector and a new run.bash file. The testbench is now functioning with 100% coverage (with waivers).
-
-I will be adding more functional coverage soon. Since I am using VCS as a simulator, transitions are taken care of for me and I do not have to write functional coverage for them manually.
+The testbench is also now running with 100% code and functional coverage with waivers (see file), so I am proud to call this project done! While there is always the possibility for improvement, I'd like to move onto a new project in order to further enhance my skills. Thanks!
 
 Following is a summary of how the testbench works:
 
