@@ -3,6 +3,7 @@ class agent extends uvm_agent;
   
   	// handles
 	driver Idriver;
+  	cov Icov;
 	uvm_analysis_port #(packet) monAP;
 	monitor Imonitor;
 	uvm_sequencer #(packet) Isequencer;
@@ -19,6 +20,7 @@ class agent extends uvm_agent;
 		Idriver = driver::type_id::create("Idriver", this);
 		Imonitor = monitor::type_id::create("Imonitor", this);
 		Isequencer  = uvm_sequencer#(packet)::type_id::create("Isequencer", this);
+      	Icov = cov::type_id::create("Icov", this);
 	endfunction : build_phase	
 
 	virtual function void connect_phase(uvm_phase phase);
@@ -27,5 +29,6 @@ class agent extends uvm_agent;
       	// connect ports
 		Idriver.seq_item_port.connect(Isequencer.seq_item_export);
       	Imonitor.monAP.connect(monAP);
+      	Imonitor.monAP.connect(Icov.ai);
 	endfunction : connect_phase
 endclass : agent
