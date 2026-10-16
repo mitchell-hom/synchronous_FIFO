@@ -8,7 +8,9 @@ This is a repository containing my work verifying my own implementation of a syn
 # Testbench Overview/Status
 This design currently passes my verification. I created directed tests that tested repeated writes, reads, interleaved writes and reads, illegal commands, and also constrained random sequences. This took some iteration with the design of the DUT, but I am happy to say that the design now passes.
 
-I've added some functional coverage and code coverage via a coverage collector and a new run.bash file. However, the changes for the functional coverage are not in the repo yet, as I would like to get those working better before adding them.
+I've added some functional coverage and code coverage via a coverage collector and a new run.bash file. The testbench is now functioning with 100% coverage (with waivers).
+
+I will be adding more functional coverage soon. Since I am using VCS as a simulator, transitions are taken care of for me and I do not have to write functional coverage for them manually.
 
 Following is a summary of how the testbench works:
 
