@@ -21,7 +21,7 @@ module DS256 (	input [global_constants::BUS_WIDTH-1:0] DIN,
 		output reg RD_ERR);
 
 	bit [global_constants::COUNT_BITS-1:0] count;
-	bit [global_constants::DEPTH-1:0] rPtr, wPtr;
+  	bit [global_constants::COUNT_BITS-2:0] rPtr, wPtr;
   	reg [global_constants::BUS_WIDTH-1:0] array [global_constants::DEPTH-1:0];
 
 	always_ff @(posedge CLK) begin
@@ -37,6 +37,11 @@ module DS256 (	input [global_constants::BUS_WIDTH-1:0] DIN,
 			//DATA_COUNT <= 0;		
 			EMPTY <= 1;
 			FULL <= 0;
+            WR_ACK <= 0;
+          	WR_ERR <= 0;
+          	RD_ACK <= 0;
+          	RD_ERR <= 0;
+          	DATA_COUNT <= 0;
 
 		// no SINIT; normal operation
 		end else begin
@@ -55,7 +60,7 @@ module DS256 (	input [global_constants::BUS_WIDTH-1:0] DIN,
 			// WRITE operation
           	end else if (WR_EN) begin
 				// ERRORS
-              	if (count >= global_constants::DEPTH | RD_EN) begin
+              if (count == global_constants::DEPTH) begin // TODO >=
 					WR_ERR <= 1;
 					WR_ACK <= 0;
 				// no error; do a write
@@ -71,14 +76,9 @@ module DS256 (	input [global_constants::BUS_WIDTH-1:0] DIN,
                   	DATA_COUNT <= count + 1; // needs this b/c of nba
 					WR_ACK <= 1;
 					WR_ERR <= 0;
-                  	// full/empty
-                	// EMPTY
-                  if (count + 1 == 0) begin
-                    	FULL <= 0;
-                    	EMPTY <= 1;
-
-                	// FULL
-                    end else if (count + 1 == global_constants::DEPTH) begin
+                	
+                  	// FULL
+                    if (count + 1 == global_constants::DEPTH) begin
                     	FULL <= 1;
                     	EMPTY <= 0;
 
@@ -92,7 +92,7 @@ module DS256 (	input [global_constants::BUS_WIDTH-1:0] DIN,
             // READ operation
 			end else if (RD_EN) begin
 				// ERRORS
-              	if (count <= 0 | WR_EN) begin
+              	if (count == 0) begin // TODO <=
 					RD_ERR <= 1;
 					RD_ACK <= 0;
 				// no error; do a read
@@ -113,11 +113,6 @@ module DS256 (	input [global_constants::BUS_WIDTH-1:0] DIN,
                   	if (count - 1 == 0) begin
                     	FULL <= 0;
                     	EMPTY <= 1;
-
-                	// FULL
-                    end else if (count - 1 == global_constants::DEPTH) begin
-                    	FULL <= 1;
-                    	EMPTY <= 0;
 
                 	// NEITHER
                 	end else begin
