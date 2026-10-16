@@ -21,11 +21,12 @@ class driver extends uvm_driver #(packet);
       
 		forever begin
           	// synchronize; wait for clock edge
-            wait(vIf.SINIT == 0);
+            //wait(vIf.SINIT == 0);
           	@(posedge vIf.CLK); 
           	seq_item_port.get_next_item(pkt);
           
           	// drive contents of packet to interface
+          	vIf.SINIT <= pkt.SINIT;
 			vIf.DIN <= pkt.DIN;
           	vIf.RD_EN <= pkt.RD_EN;
 			vIf.WR_EN <= pkt.WR_EN;
