@@ -10,29 +10,53 @@ class seq_write extends uvm_sequence #(packet);
 	virtual task body();
     	`uvm_info("seq_write", "Starting body of write sequence", UVM_LOW)
       
+        all_vals();
      	multi_wr();
       	multi_rd();
       	RESET();
       	intlv();
       	il_rq();
      	rand_cmds();
+      
 	endtask : body
  	
+  
+  	virtual task all_vals();
+      	for (int i = 0; i < 2**global_constants::DEPTH; i++) begin
+            pkt = packet::type_id::create("pkt");
+            start_item(pkt);
+            pkt.c_legal_cmd.constraint_mode(0);
+            if (!pkt.randomize() with {SINIT == 0; WR_EN == 1; RD_EN == 0; DIN == i;}) begin
+                `uvm_fatal("SEQ_RAND", "Could not randomize packet in sequence il_rq");
+            end
+            finish_item(pkt);
+
+            pkt = packet::type_id::create("pkt");
+            start_item(pkt);
+            pkt.c_legal_cmd.constraint_mode(0);
+          	if (!pkt.randomize() with {SINIT == 0; WR_EN == 0; RD_EN == 1;}) begin
+                `uvm_fatal("SEQ_RAND", "Could not randomize packet in sequence il_rq");
+            end
+          	finish_item(pkt);
+        end
+  	endtask : all_vals
   
   	// BASIC OPERATION
     // basic reset
   	virtual task RESET();
     	`uvm_info("SEQ_RST", "Starting device reset", UVM_LOW)
 
-		pkt = packet::type_id::create("pkt");
-    	start_item(pkt);
-    
-    	pkt.rand_mode(0);
-    	pkt.WR_EN = 0;
-    	pkt.RD_EN = 0;
-    	pkt.SINIT = 1;
-    	
-    	finish_item(pkt);
+      	repeat(2) begin
+            pkt = packet::type_id::create("pkt");
+            start_item(pkt);
+
+            pkt.rand_mode(0);
+            pkt.WR_EN = 0;
+            pkt.RD_EN = 0;
+            pkt.SINIT = 1;
+
+            finish_item(pkt);
+        end
     
     	pkt = packet::type_id::create("pkt");
     	start_item(pkt);
@@ -159,12 +183,26 @@ class seq_write extends uvm_sequence #(packet);
       	
 		// background read
       	READ();
+      
+      	// write and read requests at same time, without full queue
+      	pkt = packet::type_id::create("pkt");
+        start_item(pkt);
+        pkt.c_legal_cmd.constraint_mode(0);      	
+      	if (!pkt.randomize() with {SINIT == 0; WR_EN == 1; RD_EN == 1;}) begin
+        	`uvm_fatal("SEQ_RAND", "Could not randomize packet in sequence il_rq");
+      	end 
+      	finish_item(pkt);
+      
+      	// background read
+        READ();
+      
+      	RESET();
     endtask : il_rq
   
   	virtual task rand_cmds();
       `uvm_info("SEQ_rand_cmds", "Starting random commands", UVM_LOW)
 		
-      	repeat(100) begin
+      repeat(500) begin
           	pkt = packet::type_id::create("pkt");
         	start_item(pkt);
         	if (!pkt.randomize()) begin
