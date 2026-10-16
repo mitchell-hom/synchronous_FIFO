@@ -1,4 +1,5 @@
-interface DS256_if(input bit CLK, input bit SINIT);
+interface DS256_if(input bit CLK);
+  	logic SINIT;
 	logic [global_constants::BUS_WIDTH-1:0] DIN;
 	logic WR_EN;
 	logic RD_EN;
