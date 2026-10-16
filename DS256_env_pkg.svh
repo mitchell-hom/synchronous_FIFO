@@ -10,8 +10,10 @@ package DS256_env_pkg;
 	// end sequences
 	`include "driver.svh"
 	`include "monitor.svh"
+	`include "cov.svh"
 	`include "agent.svh"
 	`include "scoreboard.svh"
 	`include "environment.svh"
 	`include "base_test.svh"
+	//`include "DS256_coverage.svh"
 endpackage : DS256_env_pkg
