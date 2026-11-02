@@ -27,7 +27,7 @@ class monitor extends uvm_monitor;
 		// class's run phase
 		forever begin
 			// wait for edge of clock, then sample
-			@(vIf.mon_cb.CLK); 
+			@(vIf.mon_mp.mon_cb); 
 			
 			// instantiate packet
 			pkt = packet::type_id::create("pkt");
@@ -36,19 +36,20 @@ class monitor extends uvm_monitor;
 			// needs to be blocking bc pkt isn't persistent;
 			// gets dynamically created and destroyed throughout
 			// simulation
-			pkt.DIN = vIf.mon_cb.DIN;
-			pkt.WR_EN = vIf.mon_cb.WR_EN;
-			pkt.RD_EN = vIf.mon_cb.RD_EN; 
-			pkt.CLK = vIf.mon_cb.CLK;
-			pkt.SINIT = vIf.mon_cb.SINIT;
-			pkt.FULL = vIf.mon_cb.FULL;
-			pkt.DATA_COUNT = vIf.mon_cb.DATA_COUNT;
-			pkt.WR_ACK = vIf.mon_cb.WR_ACK;
-			pkt.WR_ERR = vIf.mon_cb.WR_ERR;
-			pkt.DOUT = vIf.mon_cb.DOUT;
-			pkt.EMPTY = vIf.mon_cb.EMPTY;
-			pkt.RD_ACK = vIf.mon_cb.RD_ACK;
-			pkt.RD_ERR = vIf.mon_cb.RD_ERR;
+			pkt.DIN = vIf.mon_mp.mon_cb.DIN;
+			pkt.WR_EN = vIf.mon_mp.mon_cb.WR_EN;
+			pkt.RD_EN = vIf.mon_mp.mon_cb.RD_EN; 
+			//pkt.CLK = vIf.mon_mp.mon_cb.CLK;
+			pkt.CLK = vIf.CLK;
+			pkt.SINIT = vIf.mon_mp.mon_cb.SINIT;
+			pkt.FULL = vIf.mon_mp.mon_cb.FULL;
+			pkt.DATA_COUNT = vIf.mon_mp.mon_cb.DATA_COUNT;
+			pkt.WR_ACK = vIf.mon_mp.mon_cb.WR_ACK;
+			pkt.WR_ERR = vIf.mon_mp.mon_cb.WR_ERR;
+			pkt.DOUT = vIf.mon_mp.mon_cb.DOUT;
+			pkt.EMPTY = vIf.mon_mp.mon_cb.EMPTY;
+			pkt.RD_ACK = vIf.mon_mp.mon_cb.RD_ACK;
+			pkt.RD_ERR = vIf.mon_mp.mon_cb.RD_ERR;
 
 			// write to analysis port
 			monAP.write(pkt);

@@ -29,13 +29,16 @@ interface DS256_if(input bit CLK);
 		input WR_EN;
 		input RD_EN;
 		
-		output FULL;
-		output DATA_COUNT;
-		output WR_ACK;
-		output WR_ERR;
-		output DOUT;
-		output EMPTY;
-		output RD_ACK;
-		output RD_ERR;
+		input FULL;
+		input DATA_COUNT;
+		input WR_ACK;
+		input WR_ERR;
+		input DOUT;
+		input EMPTY;
+		input RD_ACK;
+		input RD_ERR;
 	endclocking : mon_cb
-endinterface : DS256_if
+  
+	modport mon_mp (clocking mon_cb);
+    	modport drv_mp (clocking drv_cb);
+endinterface : DS256_ifndinterface : DS256_if
