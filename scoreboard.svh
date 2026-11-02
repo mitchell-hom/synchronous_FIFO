@@ -2,9 +2,9 @@ class scoreboard extends uvm_scoreboard;
 	`uvm_component_utils(scoreboard);
 
 	uvm_analysis_imp #(packet, scoreboard) mAI;
-	int count;
-	logic [$] wr_queue, rd_queue;
-	logic [global_constants::BUS_WIDTH-1:0] compare;
+	int compare;
+  	logic [global_constants::BUS_WIDTH-1:0] wr_queue[$];
+    logic [global_constants::BUS_WIDTH-1:0] rd_queue[$];
 	
 	function new(string name, uvm_component parent);
 		super.new(name, parent);
@@ -19,41 +19,54 @@ class scoreboard extends uvm_scoreboard;
        	
 	// checking
 	virtual function void write(packet pkt);
+        print_pkt(pkt);
 		// TODO reset
 		if (pkt.SINIT) begin
 			// reset pointers
 			// reset memory
 			// reset outputs
-		end else begin
-			if (WR_EN) begin
-				// successful write
-				if (count < global_constants::DEPTH) begin
-					wr_queue.push_back(pkt.DIN);
-					count += 1;
-				end // TODO: rejected write
-			end 
-
-			//// READ OPERATION ////
-			// register read command
-			if (RD_EN) begin
-				// successful read
-				if (count > 0) begin
-					// push to read queue 
-					rd_queue.push_back();	
-				end // TODO: rejected read
-			end
-
-			// output read data/compare
-			if (rd_queue.size() != 0) begin
+		end else begin			
+          	//// READ CHECKING ////
+          	// output read data/compare
+          	if (rd_queue.size() > 0) begin
 				compare = rd_queue.pop_front();
 				comp_DOUT(pkt, compare);
 			end
+          
+            if (pkt.WR_EN) begin
+				// successful write
+              	if (wr_queue.size() < global_constants::DEPTH) begin
+                  	wr_queue.push_back(pkt.DIN);
+				end // TODO: rejected write
+			end
+          
+            //// READ OPERATION ////
+            // register read command         
+          	if (pkt.RD_EN) begin
+				// successful read
+              	if (wr_queue.size() > 0) begin
+                    // push to read queue                   
+                  	rd_queue.push_back(wr_queue.pop_front());
+				end // TODO: rejected read
+			end
+          
+          	// TODO: read and write at the same time
 		end // else
 	endfunction : write
        	
 	
   
 	// supporting functions
+  	virtual function void print_pkt(packet pkt);
+      	$display($time);
+    	$display("PACKET RECEIVED AT MONITOR: ");
+    	$display("WR_EN: %1b", pkt.WR_EN);
+      	$display("DIN: %04b", pkt.DIN);
+    	$display("RD_EN, %1b", pkt.RD_EN);
+        $display("DOUT: %04b", pkt.DOUT);
+       	$display("");
+    endfunction : print_pkt
+    
 	virtual function void comp_DATA_COUNT(packet pkt, int count);
 		if (pkt.DATA_COUNT != count) begin
           `uvm_error("COUNT", $sformatf("DATA_COUNT is incorrect. Expected: %03b Actual: %03b", count, pkt.DATA_COUNT))
