@@ -1,21 +1,15 @@
 class scoreboard extends uvm_scoreboard;
 	`uvm_component_utils(scoreboard);
 
-  	bit [global_constants::DEPTH-1:0] compare; // compare data
-	bit [global_constants::BUS_WIDTH-1:0] prev_data;
-  	bit empty, full;
-	bit rd_err, prev_wr_err;
-	bit rd_ack, prev_wr_ack;
-	bit prev_sinit;
-  	int count; // count of data in fifo
-	int data[$]; // model queue
-  	packet pkts[$];
 	uvm_analysis_imp #(packet, scoreboard) mAI;
-  
+	int count;
+	logic [$] wr_queue, rd_queue;
+	logic [global_constants::BUS_WIDTH-1:0] compare;
+	
 	function new(string name, uvm_component parent);
 		super.new(name, parent);
       
-      	mAI = new("mAI", this);
+		mAI = new("mAI", this);
 	endfunction
 
 	// phases
@@ -25,91 +19,39 @@ class scoreboard extends uvm_scoreboard;
        	
 	// checking
 	virtual function void write(packet pkt);
-      	if (pkt.SINIT) begin
-       		count = 0;
-          	data.delete();
-          	prev_sinit = 1;
-          
-          	empty = 1;
-          	full = 0;
-          
-   			prev_wr_ack = 0;
-          	prev_wr_err = 0;
-          	rd_ack = 0;
-          	rd_err = 0;
-          
-        end else begin
-            // compare data out
-            // do comparison at every rising edge rather than
-            // only on reads because we want to make sure
-            // it is holding its previous data like a latch
-            comp_DOUT(pkt, compare); // compare only gets changed here/read
-          
-          	// compare handshaking
-          	comp_DATA_COUNT(pkt, count); // sampled like wr_* signals
-          	comp_EMPTY(pkt, empty);
-          	comp_FULL(pkt, full);
-          	comp_WR_ACK(pkt, prev_wr_ack);
-          	comp_WR_ERR(pkt, prev_wr_err);
-            comp_RD_ACK(pkt, rd_ack);
-          	comp_RD_ERR(pkt, rd_err);
-          	// reset expects
-          	prev_wr_ack = 0;
-          	prev_wr_err = 0;
-          	rd_ack = 0;
-          	rd_err = 0;
+		// TODO reset
+		if (pkt.SINIT) begin
+			// reset pointers
+			// reset memory
+			// reset outputs
+		end else begin
+			if (WR_EN) begin
+				// successful write
+				if (count < global_constants::DEPTH) begin
+					wr_queue.push_back(pkt.DIN);
+					count += 1;
+				end // TODO: rejected write
+			end 
 
-            // handling for both enabled at once
-            if (pkt.WR_EN && pkt.RD_EN) begin
-                `uvm_error("WR & RD", "WR_EN and RD_EN enabled at same time.")
-              	prev_wr_ack = 0;
-              	prev_wr_err = 1;
-              	rd_ack = 0;
-              	rd_err = 1;
+			//// READ OPERATION ////
+			// register read command
+			if (RD_EN) begin
+				// successful read
+				if (count > 0) begin
+					// push to read queue 
+					rd_queue.push_back();	
+				end // TODO: rejected read
+			end
 
-            // WRITE OPERATION
-            end else if (pkt.WR_EN) begin
-              	// NOT FULL; do normal write
-              	if (count < global_constants::DEPTH) begin
-                	data.push_back(pkt.DIN);
-                  
-                	//$display(count);
-                  	count += 1;
-                  	prev_wr_ack = 1;
-                  	prev_wr_err = 0;
-                // FULL
-                end else begin
-                  	prev_wr_ack = 0;
-                  	prev_wr_err = 1;
-                end
-
-            // READ OPERATION
-            end else if (pkt.RD_EN) begin
-              	// NOT EMPTY
-              	if (count > 0) begin
-              		// set compare; will compare in next call of write()
-                	compare = data.pop_front();
-                  
-                  	//$display(count);
-                  	count -= 1;
-                	rd_ack = 1; // flag to show we read
-                  	rd_err = 0;
-                  
-                // EMPTY
-                end else begin
-                  	// don't change compare
-                  	rd_ack = 0;
-                  	rd_err = 1;
-                end
-            end
-          
-          	// update based on count
-          	empty = (count == 0) ? 1 : 0;
-          	full = (count == global_constants::DEPTH) ? 1 : 0;
-        end // normal operation
+			// output read data/compare
+			if (rd_queue.size() != 0) begin
+				compare = rd_queue.pop_front();
+				comp_DOUT(pkt, compare);
+			end
+		end // else
 	endfunction : write
+       	
 	
-  
   
 	// supporting functions
 	virtual function void comp_DATA_COUNT(packet pkt, int count);

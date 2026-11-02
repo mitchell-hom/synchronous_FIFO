@@ -14,6 +14,6 @@ package DS256_env_pkg;
 	`include "agent.svh"
 	`include "scoreboard.svh"
 	`include "environment.svh"
-	`include "base_test.svh"
+	`include "test.svh"
 	//`include "DS256_coverage.svh"
 endpackage : DS256_env_pkg

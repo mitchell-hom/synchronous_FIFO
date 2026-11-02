@@ -24,12 +24,12 @@ module tb_top;
 			.EMPTY(Iif.EMPTY),
 			.RD_ACK(Iif.RD_ACK),
 			.RD_ERR(Iif.RD_ERR));
-	base_test Itest;
+	test Itest;
   
   	// run verification
   	initial begin
       uvm_config_db#(virtual DS256_if)::set(null, "*", "DS256_if", Iif);
-      run_test("base_test");
+      run_test("test");
     end
 
   	// initialize values
