@@ -6,7 +6,7 @@
 this is because of the flagging for the FIFO being full, which updates the timestep AFTER
 the data is latched */
 
-module DS256 (	input [global_constants::BUS_WIDTH-1:0] DIN,
+module DS256 (input [global_constants::BUS_WIDTH-1:0] DIN,
 		input WR_EN,
 		input RD_EN,
 		input CLK,
@@ -42,6 +42,8 @@ module DS256 (	input [global_constants::BUS_WIDTH-1:0] DIN,
           	RD_ACK <= 0;
           	RD_ERR <= 0;
           	DATA_COUNT <= 0;
+          
+          	DOUT <= 0;
 
 		// no SINIT; normal operation
 		end else begin
@@ -51,16 +53,10 @@ module DS256 (	input [global_constants::BUS_WIDTH-1:0] DIN,
           	RD_ACK <= 0;
           	RD_ERR <= 0;
           
-          	// both enabled; error
-          	if (WR_EN & RD_EN) begin
-            	WR_ACK <= 0;
-              	WR_ERR <= 1;
-              	RD_ACK <= 0;
-              	RD_ERR <= 1;
 			// WRITE operation
-          	end else if (WR_EN) begin
+          	if (WR_EN) begin
 				// ERRORS
-              if (count == global_constants::DEPTH) begin // TODO >=
+              	if (count == global_constants::DEPTH) begin // TODO >=
 					WR_ERR <= 1;
 					WR_ACK <= 0;
 				// no error; do a write
@@ -88,9 +84,10 @@ module DS256 (	input [global_constants::BUS_WIDTH-1:0] DIN,
                     	EMPTY <= 0;
                 	end // full/empty handshaking  
 				end // no error
+            end
               
             // READ operation
-			end else if (RD_EN) begin
+			if (RD_EN) begin
 				// ERRORS
               	if (count == 0) begin // TODO <=
 					RD_ERR <= 1;
